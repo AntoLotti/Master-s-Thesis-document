@@ -1,0 +1,459 @@
+\documentclass[a4paper,11pt,pdftex,oneside,openright,spanish]{book}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{listings}  %use source code
+\usepackage{textcomp} % use arrows \textrightarrow
+\usepackage{float}
+\usepackage{array,multirow}
+\usepackage{chapterbib}
+\usepackage{fancyhdr}
+\usepackage{tabularx} %tables easy
+\usepackage{eurosym} % €
+\usepackage{indentfirst}
+\usepackage{textcomp}
+\usepackage{color}
+\usepackage[table]{xcolor}
+\usepackage{afterpage}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage[normalem]{ulem}
+\useunder{\uline}{\ul}{}
+\usepackage[inkscapeformat=png]{svg}
+\usepackage{pdfpages}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[nonumberlist]{glossaries-extra}
+\usepackage{pdfpages}
+\usepackage{pdflscape}
+
+\lstdefinelanguage{VHDL}{
+  morekeywords={
+    library,use,all,entity,is,port,in,out,end,architecture,of,
+    begin,and,generic, std_logic, std_logic_vector,downto, integer
+  },
+  morecomment=[l]--
+}
+
+\lstdefinelanguage{JavaScript}{
+  morekeywords={
+    break, case, catch, class, const, continue, debugger, default, delete, do,
+    else, export, extends, finally, for, function, if, import, in, instanceof,
+    let, new, return, super, switch, this, throw, try, typeof, var, void, while, with, yield,document,addEventListener
+  },
+  sensitive=true,
+  morecomment=[l]{//},            % Comentarios de línea
+  morecomment=[s]{/*}{*/},        % Comentarios multilínea
+  morestring=[b]",                % Cadenas entre comillas dobles
+  morestring=[b]'                 % Cadenas entre comillas simples
+}
+
+\lstdefinelanguage{Python}{
+  morekeywords={
+    and, as, assert, async, await, break, class, continue, def, del, elif, else,
+    except, False, finally, for, from, global, if, import, in, is, lambda,
+    match, nonlocal, None, not, or, pass, raise, return, True, try, while, with, yield
+  },
+  sensitive=true,
+  morecomment=[l]{\#},               % Comentarios de línea con #
+  morestring=[b]",                    % Cadenas con comillas dobles
+  morestring=[b]',                    % Cadenas con comillas simples
+  morestring=[s]{"""}{"""},           % Cadenas/Docstrings triple doble
+  morestring=[s]{'''}{'''},           % Cadenas/Docstrings triple simple
+}
+
+\usepackage{xcolor}
+\colorlet{keyword}{blue!100!black!80}
+\colorlet{comment}{green!90!black!90}
+\lstdefinestyle{vhdl}{
+  language     = VHDL,
+  basicstyle   = \ttfamily,
+  keywordstyle = \color{keyword}\bfseries,
+  commentstyle = \color{comment}
+}
+
+\lstdefinestyle{JavaScript}{
+  language=JavaScript,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{orange},
+  commentstyle=\color{gray}\itshape,
+  numbers=left,
+  numberstyle=\tiny,
+  stepnumber=1,
+  numbersep=5pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  captionpos=b
+}
+
+\lstdefinestyle{Python}{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{orange},
+  commentstyle=\color{gray}\itshape,
+  numbers=left,
+  numberstyle=\tiny,
+  stepnumber=1,
+  numbersep=5pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  captionpos=b
+}
+
+\makeglossaries
+\setabbreviationstyle[jargon]{long-short}
+\glssetcategoryattribute{jargon}{glossdescfont}{emph} % Remove emph in glossary by using 
+
+%------------- Formato
+\setlength{\voffset}{-2cm}%
+\setlength{\hoffset}{-1in}%
+\setlength{\oddsidemargin}{3cm}%
+\setlength{\evensidemargin}{2cm}%
+\setlength{\marginparwidth}{8mm}%
+\setlength{\marginparsep}{2mm}%
+\setlength{\topmargin}{2.5cm}%
+\setlength{\textheight}{22.5cm}%
+\setlength{\headheight}{26pt}%
+\setlength{\textwidth}{16cm}%
+\setlength{\parskip}{12pt}%
+\setlength{\parsep}{1pt}%
+\setlength{\topsep}{1pt}%
+\setlength{\partopsep}{1pt}%
+\setlength{\itemsep}{0.5pt}%
+\addtolength{\textwidth}{-10mm}%
+\addtolength{\oddsidemargin}{5mm}%
+\addtolength{\evensidemargin}{5mm}%
+
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\oddsidemargin}{#1}%
+\setlength{\evensidemargin}{#1}%
+\setlength{\topmargin}{#2}
+}%
+\item[]}{\end{list}}
+%--------- end Formato
+
+
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks   = true, %Colours links instead of ugly boxes
+	urlcolor     = blue, %Colour for external hyperlinks
+	linkcolor    = blue, %Colour of internal links
+	citecolor   = blue %Colour of citations
+}
+
+%--SERGIO
+\newcommand{\CellWithForceBreak}[2][c]{
+\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+
+%--------Def
+\def \myTitle{Diseño y desarrollo de la unidad de control y comando de un sistema generador-detector de radiación ionizante}
+\def \myAuthor{Jorge Coca García}
+\def \myTutor{Pedro José Malagón Marzo}
+%\def \myPonente{Ponente}
+\def \myPlace{Madrid}
+\def \myMonth{septiembre}
+\def \myYear{2025}
+\def \myUniversity{Universidad Politécnica de Madrid}
+\def \myFaculty{Escuela Técnica Superior de Ingenieros de Telecomunicación}
+\def \myThesis{Trabajo fin de máster}
+\def \myMaster{Máster Universitario en Ingeniería de Sistemas Electrónicos}
+\def \myGradeTitle{Graduado en Ingeniería en Tecnologías de la Telecomunicación}
+\def \myPonenteGradeTitle{Catedrático de Universidad}
+\def \myTutorGradeTitle{Dr. Ingeniero de Telecomunicación}
+\def \myDepartment{Departamento de Ingeniería Electrónica}
+\def \myDedication{Dedicación.}
+\def \myQuote{''A quote'', Me.}
+
+%--------endDef
+
+\definecolor{orangeETSIT}{HTML}{FF6600}
+
+
+%------Titles composition
+\def\titleCoverPage{%
+	\begin{changemargin}{2.5cm}{2cm}
+	%\newgeometry{left=0cm}
+	\thispagestyle{empty}
+	\pagecolor{orangeETSIT}\afterpage{\nopagecolor}
+	
+	\begin{center}
+		 {\sc\huge\uppercase\expandafter{\myUniversity} \\
+			~ \\ 
+		    \LARGE\uppercase\expandafter{\myFaculty} }
+	\end{center}
+	\vspace{0.5cm}
+	\begin{center}
+		\includegraphics[height=3.2cm,width=10cm]{./Logos/etsitBlack.png}
+	\end{center}
+     \vspace{0.5cm}
+	\begin{center}
+			{\sc\LARGE\uppercase\expandafter{\myMaster} \\
+				~\\
+				\LARGE\uppercase\expandafter{\myThesis}}
+	\end{center}
+	\vspace{2.5cm}
+	\begin{center}
+	
+			{\sc\Large\uppercase\expandafter{\myTitle} ~\\}
+	\end{center}
+	\vspace{0.5cm}
+	\begin{center}
+		\rm
+		{\sc\Large\uppercase\expandafter{\myAuthor}\\
+			~\\		
+		\Large\uppercase\expandafter{\myMonth \hspace{0.1cm} \myYear}}
+	\end{center}
+	\vfill\newpage
+	\thispagestyle{empty}
+\end{changemargin}
+}
+%------endTitles composition
+
+
+\def\titleCoverPageB{%
+	\thispagestyle{empty}
+	
+	\begin{center}
+		{\sc\LARGE\uppercase\expandafter{\myUniversity} \\
+			~ \\ 
+			\Large\uppercase\expandafter{\myFaculty} }
+	\end{center}
+	\vspace{0.5cm}
+	\begin{center}
+		\includegraphics[height=3.2cm,width=10cm]{./Logos/etsit.png}
+	\end{center}
+	\vspace{0.5cm}
+	\begin{center}
+		{\sc\Large\uppercase\expandafter{\myMaster} \\
+			~\\
+			\Large\uppercase\expandafter{\myThesis}}
+	\end{center}
+	\vspace{1cm}
+	\begin{center}
+		
+		{\sc\huge\uppercase\expandafter{\myTitle} ~\\}
+	\end{center}
+	\vspace{1.5cm}
+	\begin{center}
+		\rm
+		{\sc\Large\expandafter{Autor:} \Large\uppercase\expandafter{\myAuthor}\\
+			~\\		
+			\Large\expandafter{Supervisor:} \Large\uppercase\expandafter{\myTutor} \\
+			~\\
+			%\Large\expandafter{Co-supervisor:} \Large\uppercase\expandafter{\myPonente} \\
+			~\\
+			\Large\uppercase\expandafter{\myMonth \hspace{0.1cm} \myYear}}
+	\end{center}
+	\vfill\newpage
+	}
+%------endTitles composition
+
+%----- tPage tribunal modificando
+\def\tpage{\thispagestyle{empty}%
+	%\null\vfill %vskip1in%
+	%\begin{center}
+        \vspace{0.4cm}
+	    \noindent{\sc\Large\uppercase\expandafter{\myMaster}} 
+	\vspace{1cm}
+	\par
+      \noindent{\sc\Large\uppercase\expandafter{\myThesis}}
+	\vspace{0.4cm}
+	
+	
+	\renewcommand{\baselinestretch}{2}
+	
+		\begin{minipage}[t]{0.16 \textwidth}
+		\large\expandafter{Título:} 
+	\end{minipage}
+	\   \ \hfill \begin{minipage}[t]{0.78 \textwidth}
+		\begin{flushleft}
+			\normalsize\uppercase\expandafter{\myTitle} 		
+		\end{flushleft}
+	\end{minipage}
+
+    \vspace{0.2cm}	
+    
+	\begin{minipage}[t]{0.16 \textwidth}
+		\large\expandafter{Autor:} \\
+		\large\expandafter{Supervisor:} \\
+		%\large\expandafter{Co-supervisor:} \\
+		\large\expandafter{Departamento:} 
+	\end{minipage}
+	\   \ \hfill \begin{minipage}[t]{0.78 \textwidth}
+		\begin{flushleft}
+			\large\uppercase\expandafter{\myAuthor}  \\
+			\large\uppercase\expandafter{\myTutor} \\
+			\large\uppercase\expandafter{\myPonente} \\
+			\large\uppercase\expandafter{\myDepartment}			
+		\end{flushleft}
+	\end{minipage}
+ \vspace{0.5cm}
+\renewcommand{\baselinestretch}{1}
+	
+		                   
+	\vspace{0.6cm}	
+	\noindent{\sc\Large\uppercase\expandafter{Comité de evaluación}} \\
+	\vspace{0.4cm}
+
+	\begin{tabular}{ll}
+	   
+	    \large\expandafter{Presidente:} & ..................................................................\\
+		                         &\\~\\
+        \large\expandafter{Vocal:} & ..................................................................\\
+		                         &\\~\\
+	    \large\expandafter{Secretario:} & ..................................................................\\
+		                         &\\~\\
+%	     \large\expandafter{Substitute:} & ..................................................................\\
+%		                         &\\
+	\end{tabular}
+	\par
+	\vspace{0.6cm}
+	\large\expandafter{Los miembros del comité evaluador acuerdan otorgar la calificación: ......................}\\
+        \vspace{0.5cm}
+	\par
+	\vspace{1cm}
+	\hspace{4cm}\large\expandafter{Madrid, a .........................., \myYear} 
+        \vspace{0.5cm}
+	\par
+	%\vspace*{2cm}
+	%\hspace{7cm} Evaluation Committee Secretary
+	\vfill\newpage
+	\thispagestyle{empty}
+}
+%----- endSecondPage tribunal
+
+
+\def\dedicatoriapage{
+\newpage
+%\thispagestyle{empty}
+\begin{large}
+	\begin{flushright}
+		\quad \vspace{3cm} \\
+		\emph{\myDedication}
+	\end{flushright}
+\end{large}
+%------------------
+\vfill\newpage
+%\thispagestyle{empty}
+}
+%------------------
+
+\def\citapage{
+\newpage
+%\thispagestyle{empty}
+\begin{large}
+	\begin{flushright}
+		\quad \vspace{3cm} \\
+		\emph{\myQuote}
+		\vspace{1cm}\\	
+	\end{flushright}
+\end{large}
+%------------------
+\vfill\newpage
+%\thispagestyle{empty}
+}
+%------------------
+
+
+\begin{document}
+
+    \title{\myTitle}
+    \author{\myAuthor}
+    \input{Chapters/Glossary.tex}
+    \glsresetall
+    
+    \pagestyle{plain}
+    \pagenumbering{arabic}
+	\titleCoverPage
+	\null\newpage
+	%\firstpage
+	%\null\newpage
+	\tpage
+    \null\newpage
+    \setcounter{page}{1}
+    \titleCoverPageB
+    
+    %\dedicatoriapage
+    %\null\newpage
+    %\citapage
+    \null\newpage
+    
+    
+    \input{Chapters/Abstract.tex}
+    \vfill\newpage
+    \input{Chapters/Resumen.tex}
+    \vfill\newpage
+    \input{Chapters/Acknowledgements.tex}
+    \vfill\newpage
+    
+    \pagestyle{plain}
+
+    
+
+    %\addcontentsline{toc}{chapter}{\contentsname}
+    \tableofcontents
+    \listoffigures
+    \listoftables
+    \printglossaries
+    \vfill\newpage
+    
+    \newpage
+    \pagenumbering{arabic}
+    \thispagestyle{empty}
+    
+    \pagestyle{fancy}
+    %\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+    %---mycode
+    \fancyhf{}
+    \fancyhead[LE,RO]{\leftmark}
+    \fancyfoot[CE,CO]{\thepage}
+    %---mycode
+    
+    \setcounter{figure}{0}
+    \setcounter{equation}{0}
+    \setcounter{table}{0}
+    \setcounter{page}{0}
+    
+    \input{Chapters/Intro.tex}
+    \input{Chapters/antecedentes.tex}
+    \input{Chapters/Arch.tex}
+    \input{Chapters/Implementation.tex}
+    \input{Chapters/Results.tex}
+    \input{Chapters/FutureWork.tex}
+    
+    
+
+    % \addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
+    \appendix % Cue to tell LaTeX that the following 'chapters' are Appendices
+    %\input{Chapters/Coef_tables.tex}
+    \input{Chapters/Budget.tex}
+    \input{Chapters/EESE_aspects.tex}
+    % \renewcommand\chaptername{Apéndice}
+    %\input{Anexos/VerilogA_to}
+    %\input{Anexos/ResistanceTables.tex}
+    %\input{Anexos/VerilogA_to_Symbol.tex}
+    %\input{Anexos/A-Impact.tex}
+    %\input{Anexos/B-Cost.tex}
+    \addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+    %\backmatter
+
+\bibliographystyle{IEEEtran}
+%\bibliographystyle{alpha}
+\bibliography{latexBib}
+
+    \cleardoublepage
+
+
+    
+\end{document}
