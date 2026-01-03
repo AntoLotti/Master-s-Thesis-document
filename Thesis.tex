@@ -1,7 +1,8 @@
-\documentclass[a4paper,11pt,pdftex,oneside,openright,spanish]{book}
+\documentclass[a4paper,11pt,pdftex,oneside,openright,english]{book}
 
 \usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}
+%\usepackage[spanish]{babel}
+\usepackage[english]{babel}
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{amsmath}
@@ -181,7 +182,8 @@
 
 
 %------Titles composition
-\def\titleCoverPage{%
+\def\titleCoverPage
+{
 	\begin{changemargin}{2.5cm}{2cm}
 	%\newgeometry{left=0cm}
 	\thispagestyle{empty}
@@ -194,7 +196,7 @@
 	\end{center}
 	\vspace{0.5cm}
 	\begin{center}
-		\includegraphics[height=3.2cm,width=10cm]{./Logos/etsitBlack.png}
+		\includegraphics[height=3.2cm,width=10cm]{./Resources/Logos/etsitBlack.png}
 	\end{center}
      \vspace{0.5cm}
 	\begin{center}
@@ -231,7 +233,7 @@
 	\end{center}
 	\vspace{0.5cm}
 	\begin{center}
-		\includegraphics[height=3.2cm,width=10cm]{./Logos/etsit.png}
+		\includegraphics[height=3.2cm,width=10cm]{./Resources/Logos/etsit.png}
 	\end{center}
 	\vspace{0.5cm}
 	\begin{center}
@@ -294,7 +296,7 @@
 		\begin{flushleft}
 			\large\uppercase\expandafter{\myAuthor}  \\
 			\large\uppercase\expandafter{\myTutor} \\
-			\large\uppercase\expandafter{\myPonente} \\
+			%\large\uppercase\expandafter{\myPonente} \\
 			\large\uppercase\expandafter{\myDepartment}			
 		\end{flushleft}
 	\end{minipage}
@@ -334,7 +336,8 @@
 %----- endSecondPage tribunal
 
 
-\def\dedicatoriapage{
+\def\dedicatoriapage
+{
 \newpage
 %\thispagestyle{empty}
 \begin{large}
@@ -370,7 +373,7 @@
 
     \title{\myTitle}
     \author{\myAuthor}
-    \input{Chapters/Glossary.tex}
+    \input{Chapters/0_Glossary.tex}
     \glsresetall
     
     \pagestyle{plain}
@@ -390,16 +393,14 @@
     \null\newpage
     
     
-    \input{Chapters/Abstract.tex}
+    \input{Chapters/1_Abstract.tex}
     \vfill\newpage
-    \input{Chapters/Resumen.tex}
+    \input{Chapters/2_Resumen.tex}
     \vfill\newpage
-    \input{Chapters/Acknowledgements.tex}
+    \input{Chapters/3_Acknowledgements.tex}
     \vfill\newpage
     
     \pagestyle{plain}
-
-    
 
     %\addcontentsline{toc}{chapter}{\contentsname}
     \tableofcontents
@@ -414,6 +415,7 @@
     
     \pagestyle{fancy}
     %\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+
     %---mycode
     \fancyhf{}
     \fancyhead[LE,RO]{\leftmark}
@@ -425,26 +427,17 @@
     \setcounter{table}{0}
     \setcounter{page}{0}
     
-    \input{Chapters/Intro.tex}
-    \input{Chapters/antecedentes.tex}
-    \input{Chapters/Arch.tex}
-    \input{Chapters/Implementation.tex}
-    \input{Chapters/Results.tex}
-    \input{Chapters/FutureWork.tex}
+    \input{Chapters/4_Intro.tex}
+    \input{Chapters/5_Background.tex}
+    \input{Chapters/6_Arch.tex}
+    \input{Chapters/7_Implementation.tex}
+    \input{Chapters/8_Results.tex}
+    \input{Chapters/9_FutureWork.tex}
     
     
-
     % \addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
     \appendix % Cue to tell LaTeX that the following 'chapters' are Appendices
-    %\input{Chapters/Coef_tables.tex}
-    \input{Chapters/Budget.tex}
-    \input{Chapters/EESE_aspects.tex}
-    % \renewcommand\chaptername{Apéndice}
-    %\input{Anexos/VerilogA_to}
-    %\input{Anexos/ResistanceTables.tex}
-    %\input{Anexos/VerilogA_to_Symbol.tex}
-    %\input{Anexos/A-Impact.tex}
-    %\input{Anexos/B-Cost.tex}
+ 
     \addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
     %\backmatter
 
@@ -454,6 +447,4 @@
 
     \cleardoublepage
 
-
-    
 \end{document}
