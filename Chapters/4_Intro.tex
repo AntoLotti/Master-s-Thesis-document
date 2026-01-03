@@ -1,6 +1,45 @@
 \chapter{Introduction}
 \label{chap:Intro}
 
+Technology, like most things, evolves, and with it, so do all related disciplines, 
+such as science and engineering, among others. And, in turn, the teaching of these 
+disciplines must also evolve.
+
+This thesis presents a QEMU-based emulation of the STM32F405 microcontroller 
+and the LIS3DH accelerometer, providing a virtual platform that runs unmodified 
+firmware and replicates the behavior of real devices. The intention with this virtual 
+environment is to replace some of the physical laboratory tools used in the 
+Master's Program in Electronic Systems Engineering at the Polytechnic University of 
+Madrid, allowing students to experiment with microcontroller peripherals and I²C-based 
+sensors using only their personal computers, while preserving the pedagogical 
+value of working closely with the hardware.
+
+
+%Emulation is not a new concept. In computer engineering, emulation means that one 
+%system (the host) behaves like another (the guest), so that the latter's software 
+%and peripherals function without modification. This is the standard definition of 
+%emulation in computing \cite{1}. However, when applied specifically to hardware, the 
+%goal is to reproduce registers, busses, timing behavior, and I/O interfaces so that 
+%the emulated device can be used in place of the original hardware system.
+%
+%Hardware emulation emerged in the second half of the 1980s, as verification tools. 
+%This hardware emulation, better known as hardware emulation on-chip, works by 
+%programming FPGA-based hardware using a hardware description language 
+%(such as Verilog or VHDL) of a chip or SoC.
+%
+%On the other hand, software-based hardware emulation is performed purely in software, 
+%without requiring any additional hardware. In this type of emulation, a 
+%program creates a virtual hardware environment that mimics processors, memory 
+%maps, and devices, so that firmware or operating systems compiled for the target 
+%board run without modification on the host.
+%
+%This thesis presents a QEMU-based emulation of the STM32F405 microcontroller 
+%and the LIS3DH accelerometer, providing a virtual platform that executes 
+%unmodified firmware and reproduces the behavior of real devices. 
+%The proposed environment aims to replace part of the physical laboratory setup, enabling students 
+%to experiment with microcontroller peripherals and I2C-based sensing using only 
+%their personal computers, while preserving the pedagogical value of working close to the hardware.
+
 %==== Motivation ====%
 \input{Chapters/Intro/Motivation.tex}
 
