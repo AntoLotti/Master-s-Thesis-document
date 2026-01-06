@@ -1,0 +1,57 @@
+\section{ARM Architecture}
+\label{chap:Back_ARM}
+
+Originated in the 1980s, the history of ARM started when a company named 
+Acorn Computers looking for a 16-bit microprocessor for their next desktop 
+machine could not find any that suited their needs. Their solution, make their own 
+microprocessor. Based on the Berkeley RISC 1\cite{WikiBerkeleyRISC2026}, in 1985 Acorn released the 
+first Acorn RISC Machine (ARM) in 1985, a compact 26‑bit RISC core, becoming the 
+first commercial RISC processor in the world. This microprocessor matched or 
+exceeded contemporary CISC processors, like the Intel 80286 processor,  while using 
+less than 25,000 transistors, a very small number even for 1985. This established 
+ARM's reputation for efficiency and clean architectural design.
+
+This first ARM architecture used by Acorn, is now know as the ARM version 
+1 architecture. Since then, the ARM architecture has continued evolving. In 1987, 
+the ARM version 2 introduced coprocessor support. In 1990, the company 
+"Arm Holdings" was founded when the Acorn architecture division spun off as a joint 
+venture with Apple and VLSI Technology. In this document, the term "ARM" 
+(in all caps) has been used and will be used to refers the processor architecture, when 
+referring to the company, it will be by the name "Arm Holdings".
+
+The 3th generation of the ARM architecture included 32-bit addressing, MMU 
+support, and 64-bit multiplier-accumulate instructions. It was implemented in the 
+ARM 6 and ARM 7 cores. The release of these processors marked ARM's entry 
+into the embedded systems market. The 4th generation of the ARM architecture 
+introduced support for the compressed 16-bit Thumb instruction set, which reduced 
+its size.In 1999, the 5th generation of the ARM architecture introduced digital signal 
+processing and Java byte code extensions to the ARM instruction set\cite{Levy2005}\cite{WikiARMArm2026}.
+
+The 6th generation of the ARM architecture introduced the SIMD instruction set 
+extension, improved the Thumb instruction set, TrustZone virtualization technology, 
+and multiprocessor support.The 7th generation of the ARM architecture established 
+a consolidated 32-bit instruction set with enhancements including extended SIMD 
+capabilities, improved floating-point support, and the Thumb-2 instruction set for 
+code density optimization. The 8th generation of the ARM architecture marked 
+a generational leap by introducing 64-bit execution while maintaining backward 
+compatibility with 32-bit code of the 7th generation.
+
+- **T1** \cite{Levy2005} \cite{ArmVir2020}
+
+Nowadays, ARM-based processors have become very popular in devices, mobile 
+phones, and embedded systems. Their popularity in modern embedded systems has 
+led to them becoming the most widely used commercial microprocessor architecture. 
+According to the ARM Architecture Organization, in the fourth quarter of 
+2020, ARM produced approximately 6.7 billion ARM-based chips, its highest ever\cite{ArmShipments2021}. 
+The reader should understand that Arm Holdings has never been a microprocessor 
+manufacturer; it always been a fabless company. It designs ARM architectures 
+(ARMv4, ARMv5, Cortex families, ARMv8, etc.) and licenses these designs to 
+semiconductor companies, such as STMicroelectronics or NXP, which use them 
+as their products core.
+
+%==== ARM In Education ====%
+\input{Chapters/Backgroung/ARM/ARM_In_Education.tex}
+
+%==== ARM In Education ====%
+\input{Chapters/Backgroung/ARM/STM32F4xx.tex}
+
