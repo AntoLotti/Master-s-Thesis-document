@@ -1,0 +1,9 @@
+\subsubsection{Address Phase}
+\label{chap:Back_I2C_Protocol_Address}
+
+After the master generates a START condition, it transmits the first byte on 
+the bus. In the standard 7-bit scheme, the upper seven bits of this byte contain 
+the slave address, and the least significant bit indicates the transfer direction: read 
+or write. Every device on the bus compares these seven address bits with its own 
+configured address; a device whose address matches considers itself selected and 
+responds accordingly.

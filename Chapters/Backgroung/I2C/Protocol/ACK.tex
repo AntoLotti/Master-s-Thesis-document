@@ -1,0 +1,21 @@
+\subsubsection{Acknowledge (ACK)}
+\label{chap:Back_I2C_Protocol_ACK}
+
+After every transmitted byte, there is an acknowledge phase. The ACK bit is 
+used by the receiver, whereby the receiver can signal the transmitter that the byte 
+was received (not the byte, rather the byte is all byte transfers, i.e. signal the 
+transmitter that the byte transfer was completed). The master generates all clock 
+pulses, including the ninth clock cycle, which is used for ACK/NACK. During this 
+ninth clock, the transmitter releases SDA so the receiver can drive it. 
+
+An ACK is signaled when the receiver pulls SDA LOW and holds it while SCL 
+is HIGH for that clock cycle. A NACK is signaled when SDA stays HIGH during 
+the ninth clock cycle. 
+
+After a NACK, the controller usually either does a STOP to end the transfer 
+or a repeated START to initiate a new transaction. NACKs can occur for various 
+reasons, such as the absence of a device at the transmitted address, the device 
+that was addressed is busy and cannot respond, the receiver is unable to process 
+the command or data that was sent, the receiver has a busy status meaning it 
+cannot accept additional data, or a controller-receiver pair uses NACK to signal a 
+termination of the transfer to the target transmitter.

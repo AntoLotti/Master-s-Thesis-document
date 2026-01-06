@@ -1,0 +1,11 @@
+\subsubsection{Data To Transfer}
+\label{chap:Back_I2C_Protocol_Data}
+
+Data on the SDA line is always transferred in bytes of 8-bits. The valid data bit 
+must be stable while SCL is HIGH: data is placed on SDA while SCL is LOW 
+and is sampled after SCL goes HIGH. As a result, SDA is only allowed to change 
+state when SCL is LOW, except when generating START or STOP conditions. The 
+number of data bytes in a transfer is not limited by the protocol itself, but each 
+byte must be followed by a single acknowledge (ACK) bit.
+
+- **F7**

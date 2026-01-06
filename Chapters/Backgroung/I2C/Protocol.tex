@@ -1,0 +1,24 @@
+\subsection{Protocol}
+\label{chap:Back_I2C_Protocol}
+
+This section of the chapter will explain how the protocol used in I2C communication 
+works to transfer data. In the I2C protocol, data is transferred in messages, 
+which are divided into two types of frames, an address frame, where the master 
+specifies the destination device, and one or more data frames. The frames are 8-bit 
+data units exchanged between the master and slave. Each message also includes 
+START and STOP conditions, a read/write bit, and ACK/NACK bits between the 
+data bytes to facilitate handshake and error signaling.
+
+- **F4**
+
+%==== Start_&_Stop ====%
+\input{Chapters/Backgroung/I2C/Protocol/Start_&_Stop.tex}
+
+%==== Data ====%
+\input{Chapters/Backgroung/I2C/Protocol/Data.tex}
+
+%==== Address ====%
+\input{Chapters/Backgroung/I2C/Protocol/Address.tex}
+
+%==== ACK ====%
+\input{Chapters/Backgroung/I2C/Protocol/ACK.tex}

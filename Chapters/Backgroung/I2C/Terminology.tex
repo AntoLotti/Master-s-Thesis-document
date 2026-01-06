@@ -1,0 +1,40 @@
+\subsection{I2C Terminology}
+\label{chap:Back_I2C_Terminology}
+
+In the table \ref{tab:i2c_terminology} there are some important terms/concepts related with the 
+I2C protocol, that will be needed before entering in deep how the I2C works.
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|l | l|}
+        \toprule
+        TERM            & DESCRIPTION \\        
+        \midrule
+        Transmitter     & The device which sends data to the bus \\
+        \hline
+        Receiver        & The device which receives data from the bus\\
+        \hline
+        Master          & The device which initiates a transfer, generates\\ 
+                        & clock signals and terminates a transfer \\
+        \hline
+        Slave           & The device addressed by a master \\
+        \hline
+        Multi-master    & More than one master can attempt to control the \\
+                        &  bus at the same time without corrupting the message \\
+        \hline
+        Arbitration     & Procedure to ensure that, if more than one master \\
+                        & simultaneously tries to control the bus, only one \\ 
+                        & is allowed to do so and the winning message is not \\
+                        & corrupted \\
+        \hline
+        Synchronization & Procedure to synchronize the clock signals of two \\
+                        & or more devices \\
+        \bottomrule
+    \end{tabular}
+
+    \caption
+        {
+            Definition of I$^2$C-bus terminology \cite{I2CSpec2000}
+        }
+    \label{tab:i2c_terminology}
+\end{table}
