@@ -1,0 +1,51 @@
+\section{QEMU, The Quick Emulator}
+\label{chap:Back_QEMU}
+
+The core of this project lies in the hardware emulation platform. QEMU was 
+selected over other options after meeting several requirements revealed in previous 
+analyses, which will be explained later in this document. This section of the chapter 
+aims to introduce QEMU as a tool, provide a more in-depth analysis of the tool, 
+and describe who will be done in the next chapter.
+
+The Quick Emulator or or as it is mostly known QEMU [1], is a generic and 
+open source machine emulator and virtualizer that allows the user operating 
+systems and programs designed for one machine architecture on a completely different 
+architecture. Created by Fabrice Bellard[2], QEMU has evolved into a sophisticated 
+virtualization solution that supports a wide range of CPU architectures including 
+x86, ARM, RISC-V, PowerPC, and MIPS. 
+
+This hardware emulator use Dynamic Binary Translation (DBT), based on JIT 
+compilation, to achieve fast emulation speed. The use of DBT enables running 
+binary code generated for a target (or a guest) processor on another host 
+processor, which has an entirely different ISA. This means that it translates the binary code 
+associated to the target CPU into the instructions of the host CPU. Then, it executes 
+the translated instructions on the host CPU.
+
+Since its release in 2005, many features have been added to QEMU, such as peripheral support, support for different architectures, virtualisation and performance improvements. Nowadays, QEMU offers multiple modes of operation:
+
+\begin{enumerate}
+  \item \textbf{Full-system emulation:} 
+  Complete virtual machine emulation with virtual 
+  peripherals. The QEMU's default translation engine is DBT or parallelized-DBT, 
+  called Multi-Threaded Tiny Code Generator (MTTCG)
+
+  \item \textbf{User-mode emulation:} 
+  Running individual applications compiled for different 
+  architectures than the guest system. In this mode QEMU emulates only 
+  the CPUs. It executes guest instructions, captures system calls, and sends 
+  them to the host kernel. 
+  
+  \item \textbf{Hardware-virtualization:} 
+  QEMU use hardware extensions like KVM or Xen 
+  to emulate the guest code, with near-native performance. In this case, QEMU 
+  deals with all virtualisation aspect that can not be emulated (peripherals or 
+  input/output management). The guest code execution is a task of the host 
+  virtualisation support. The virtualisation requires host hardware support to 
+  execute the guest code directly, so it only works if the guest has the same 
+  instruction set architecture as the host.
+\end{enumerate}
+
+
+As an advance of the next section, due that for the aim of the project a whole 
+MCU, the stm32f4005, must be emulated to see the behavior of the I2C peripheral, 
+QEMU will be working in the Full-system mode.
