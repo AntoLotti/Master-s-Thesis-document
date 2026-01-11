@@ -1,0 +1,13 @@
+\subsection{Full-System Emulation}
+\label{chap:Back_QEMU_FSE}
+
+For the current project, and because the necessity to emulates an entire development 
+board, including the STM32F405 microcontroller, the memory, the peripherals, 
+the buses and firmware, QEMU will be used in its full system emulation mode.
+Regardless of the mode, at the highest level QEMU operates as a conventional userspace 
+application on the host operating system, **FX**. Invoked in full-system mode, the 
+main QEMU process performs an initialization of all the virtual componentes of the 
+hardware, and then enters a main loop in which it repeatedly executes blocks of 
+guest code and handles peripheral events.
+
+- **FX**
