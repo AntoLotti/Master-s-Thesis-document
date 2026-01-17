@@ -32,8 +32,10 @@
 \usepackage[nonumberlist]{glossaries-extra}
 \usepackage{pdfpages}
 \usepackage{pdflscape}
+\usepackage{xcolor}
 
-\lstdefinelanguage{VHDL}{
+\lstdefinelanguage{VHDL}
+{
   morekeywords={
     library,use,all,entity,is,port,in,out,end,architecture,of,
     begin,and,generic, std_logic, std_logic_vector,downto, integer
@@ -41,7 +43,22 @@
   morecomment=[l]--
 }
 
-\lstdefinelanguage{JavaScript}{
+\lstdefinelanguage{C}
+{
+  morekeywords={
+    reak, case, catch, const, continue, debugger, default,
+    else, for, function, if, return, switch, throw, typdef,
+	void, while
+  },
+  sensitive=true,
+  morecomment=[l]{//},            % Comentarios de línea
+  morecomment=[s]{/*}{*/},        % Comentarios multilínea
+  morestring=[b]",                % Cadenas entre comillas dobles
+  morestring=[b]'                 % Cadenas entre comillas simples
+}
+
+\lstdefinelanguage{JavaScript}
+{
   morekeywords={
     break, case, catch, class, const, continue, debugger, default, delete, do,
     else, export, extends, finally, for, function, if, import, in, instanceof,
@@ -54,7 +71,8 @@
   morestring=[b]'                 % Cadenas entre comillas simples
 }
 
-\lstdefinelanguage{Python}{
+\lstdefinelanguage{Python}
+{
   morekeywords={
     and, as, assert, async, await, break, class, continue, def, del, elif, else,
     except, False, finally, for, from, global, if, import, in, is, lambda,
@@ -68,14 +86,26 @@
   morestring=[s]{'''}{'''},           % Cadenas/Docstrings triple simple
 }
 
-\usepackage{xcolor}
 \colorlet{keyword}{blue!100!black!80}
 \colorlet{comment}{green!90!black!90}
+
 \lstdefinestyle{vhdl}{
   language     = VHDL,
   basicstyle   = \ttfamily,
   keywordstyle = \color{keyword}\bfseries,
   commentstyle = \color{comment}
+}
+
+\lstdefinestyle{C}
+{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{orange},
+  commentstyle=\color{gray}\itshape,
+  numbers=left,
+  numberstyle=\tiny,
+  frame=single
 }
 
 \lstdefinestyle{JavaScript}{
