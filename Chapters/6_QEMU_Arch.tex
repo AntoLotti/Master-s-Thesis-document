@@ -1,3 +1,42 @@
 \chapter{QEMU Architecture}
 \label{chap:QEMU_Arch}
 
+A key aspect of this project was identifying a suitable hardware emulation 
+platform. In order to find the perfect platform, deeper analysis of the main problem 
+was done, revealing several essential requirements. If each student is to have 
+access to their own emulated hardware, the chosen emulator must be compatible with 
+both university workstations and students' personal laptops. Therefore, it should 
+be cross-platform and, ideally, require minimal storage space. In addition, and more 
+important, it must support realistic firmware execution: firmware compiled with 
+the same toolchain used for the physical hardware should behave identically in the 
+emulated environment.
+
+Under these conditions, several names were considered. Among them: Qemu, 
+Renode\cite{RenodeGitHub}, OVPsim\cite{OVPworld2025} and Keil/Proteus\cite{ProteusLabcenter}. Among these four, only QEMU and 
+Renode provide the necessary open-source licensing and building adaptability to 
+create and publish new device models for the STM32F405 + LIS3DH as part of 
+academic research. Although Renode is a very powerful tool, QEMU was the final 
+choice. Renode, despite being open source, is maintained by Antmicro, which is an 
+advantage, but it's a very new tool and not as well-known or widely used compared 
+to QEMU.
+
+QEMU is a system emulator that allows the virtualization of entire computer 
+systems, including various CPU architectures and their peripheral hardware. While 
+interesting, a comprehensive study of QEMU's behavior and components is beyond 
+the scope of this thesis. This chapter is designed to help any board or SoC developer 
+wishing to develop in QEMU understand its architecture and inner workings, focusing 
+on three essential subsystems: the Tiny Code Generator (TCG), which dynamically 
+translates guest CPU instructions into native host code; a complex Memory 
+Management model that creates hierarchical, multi-layered address spaces to 
+accurately emulate physical RAM, MMIO, and DMA; and the QEMU Object Model (QOM), 
+which provides a flexible framework for defining, instantiating, and 
+connecting emulated hardware devices\cite{Bellard2005Qemu}.
+
+%==== Machine Code Translation ====%
+\input{Chapters/QEMU/Machine_Code_Trans.tex}
+
+%==== Memory ====%
+\input{Chapters/QEMU/Memory.tex}
+
+%==== QOM ====%
+\input{Chapters/QEMU/QEMU_dev_impl.tex}
