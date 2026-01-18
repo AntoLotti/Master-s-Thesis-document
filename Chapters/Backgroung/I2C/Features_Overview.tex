@@ -6,19 +6,33 @@ Like other serial communication protocols, the I2C bus has a serial data line
 protocol was created to allow communication between multiple devices over these 
 two shared lines. The SCL line, mostly managed by the master device, serves to 
 clock data in or out of the slave device. The other, the SDA line, which sends or 
-receives data to and from the slave devices. Figure **F1** shows a standard I2C 
+receives data to and from the slave devices. Figure \ref{fig:I2C_imp} shows a standard I2C 
 physical layer implementation.
 
-- **F1**
+
+\begin{figure}[H]
+    \centering
+%    \includegraphics[width=0.7\textwidth]{Resources/Draw/Full-system.pdf}
+    \caption{Typical I2C implementation.}
+    \label{fig:I2C_imp}
+\end{figure}
+
 
 The I2C protocol is designed so that the SDA and SCL lines have an open-drain 
 connection with all devices on the bus. This requires a pull-up resistor connected to 
-a common voltage source, as shown in Figure **F1**. The pull-up resistors define 
+a common voltage source, as shown in Figure \ref{fig:I2C_imp}. The pull-up resistors define 
 the high logic level and ensure that contention does not occur on the bus, where 
 one device attempts to activate the line while another deactivates it. This prevents 
 potential damage to the controllers.
 
-- **F2**
+
+\begin{figure}[H]
+    \centering
+%    \includegraphics[width=0.7\textwidth]{Resources/Draw/Full-system.pdf}
+    \caption{Open Drain.}
+    \label{fig:Open_Drain}
+\end{figure}
+
 
 The I2C protocol is designed as a half-duplex communication scheme, in which 
 only a single master or slave device transmits data on the bus at any given time. 
@@ -28,7 +42,14 @@ master-slave relationship is established: masters can act as master-transmitters
 master-receivers, where the master is the device that initiates the data transfer and generates 
 the clock signals required for communication.
 
-- **F3**
+
+\begin{figure}[H]
+    \centering
+%    \includegraphics[width=0.7\textwidth]{Resources/Draw/Full-system.pdf}
+    \caption{Multi-master example}
+    \label{fig:Multi_master}
+\end{figure}
+
 
 There can be more than one master connected to the same bus, both capable 
 of controlling it. Since masters are usually microcontrollers, an example of data 

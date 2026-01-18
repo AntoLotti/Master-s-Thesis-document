@@ -36,7 +36,37 @@ code density optimization. The 8th generation of the ARM architecture marked
 a generational leap by introducing 64-bit execution while maintaining backward 
 compatibility with 32-bit code of the 7th generation.
 
-- **T1** \cite{Levy2005} \cite{ArmVir2020}
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+        \toprule
+        Version & Year  & Features  &   Implementations \\
+        \midrule
+        v1      & 1985  & The first commercial RISC (26-bit) & ARM1 \\
+        \hline
+        v2      & 1987  & Coprocessor support           & ARM2, ARM3 \\
+        \hline
+        v3      & 1992  & 32-bit, MMU, 64-bit MAC       & ARM6, ARM7 \\
+        \hline
+        v4      & 1996  &                               & ARM7TDMI, ARM8, \\
+                &       & Thumb                         & ARM9TDMI, StrongARM \\
+        \hline
+        v5      & 1999  & DSP and Jazelle extensions    & ARM10, XScale \\
+        \hline
+        v6      & 2001  & SIMD, Thumb-2, TrustZone,     & ARM11,  \\
+                &       & multiprocessing               & ARM11 MPCore\\
+        \bottomrule
+    \end{tabular}
+
+    \caption
+        {
+            History of the ARM architecture \cite{Levy2005} \cite{ArmVir2020}
+        }
+
+    \label{tab:arm_history}
+\end{table}
+
 
 Nowadays, ARM-based processors have become very popular in devices, mobile 
 phones, and embedded systems. Their popularity in modern embedded systems has 
