@@ -1,2 +1,58 @@
 \subsection{QEMU Device Model (Qdev)}
 \label{chap:QEMU_qdev}
+
+While the QOM provides the infrastructure for the creation and the handling 
+of objects in QEMU, these are generic and they do not specifically address the 
+requirements of hardware device modeling. As result, QEMU Device API (QDev) 
+was designed to covered this gap. This QEMU's API is a specialized framework built 
+atop QOM that abstracts the complexities of emulated hardware devices, buses, and 
+their interactions. It's important to denote that, because QDev is implemented as a 
+QOM-based extension, each QDev device is itself a QOM object, meaning it inherits 
+QOM's type system, introspection, and dynamic property mechanisms.
+
+Qdev works as a layer that unify the description, creation, connection, and 
+configuration of the emulated hardware components—ensuring that every device, 
+regardless of its specific peripheral function, follows consistent patterns for initialization, 
+property management, lifecycle stages, and system integration. The device-specific 
+capabilities that Qdev introduce for hardware emulation includes: DeviceClass, 
+Lifecycle Stages, Bus Abstraction, GPIO/IRQ System, Reset Propagation, Hotplug Support
+
+
+Most of the capabilities mentioned are achieved through several layers of 
+abstraction in order to standardize and simplify the creation of emulated hardware to 
+the developer. Due to the associated complexity, it is important for developers to 
+understand qdev's layers of abstraction before reading or writing code; not doing it, 
+could lead to a spiral of confusion about how and why things are done in QEMU. 
+The device lifecycle is the first thing Qdev applies, providing a guide with several 
+standardized phases to ensure that the firmware running on QEMU can reliably interact 
+with devices through predictable boot sequences and initialization patterns. 
+The **F1** show this process.
+
+- **F1**
+
+The second element provided by QDev is a bus abstraction layer, which will be 
+especially relevant later in this thesis for emulating the STM32F405 address map. 
+In QEMU, thanks to this bus abstraction layer, devices do not exist in isolation 
+but are organized hierarchically and connected to buses. These buses manage 
+address allocation, establish parent-child relationships, and handle address translation 
+for memory-mapped I/O. This is fundamental for emulating microcontrollers with 
+multiple peripherals, each occupying different memory regions and responding to 
+specific addresses on the bus. Table T1 shows a list of common QEMU buses 
+and their purpose.
+
+- **T1**
+
+Fourth, QDev implements reset propagation, allowing a system reset command 
+to cascade through the entire device tree, ensuring all peripherals return to their 
+initial states in the correct order—essential for firmware that relies on peripheral 
+reset behavior. And finally, QDev also supports hotplug, permitting devices to be 
+dynamically added or removed at runtime, though this feature is less critical for 
+bare-metal microcontroller emulation than for system-level scenarios.
+
+Like the QOM API, QDev also has its main types of C structures. There are 
+three types of C structures that developers should be familiar with: **DeviceClass**, 
+**DeviceState**, and **BusState**. Of these, the one developers should be familiar 
+with is **DeviceClass**, since all device types inherit from **DeviceClass**, which 
+in turn extends **ObjectClass**.
+
+-**C2**

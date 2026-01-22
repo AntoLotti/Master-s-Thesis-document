@@ -1,6 +1,28 @@
 \section{QEMU's Devices Implementation}
 \label{chap:QEMU_dev_imp}
 
+The device emulation is the mechanism by which QEMU represents hardware as 
+software objects executing on the host CPU. Unlike functional simulation—which 
+attempts to model device behavior at a high level of abstraction—QEMU device 
+emulation target for cycle-accurate and register-accurate fidelity. Understanding 
+how to create and integrate new devices and buses is crucial for any developer who 
+wants to emulate their hardware in QEMU. Since this thesis will implement the I2C 
+protocol of a microcontroller and a complete peripheral device, it is convenient to 
+explain this process.
+
+Internally, QEMU faces a very complex challenge. The device management of 
+several diverse devices, from simple UARTs to complex GPU controllers, 
+each with unique register layouts, timing behaviors, and interrupt patterns. Creating a 
+system capable of emulating hardware at the level QEMU aims for, without a 
+well-structured architecture, would result in a monolithic and unmaintainable codebase.
+
+This section of the chapter explores the fundamentals of the QEMU subsystems 
+that make the device emulation in QEMU possible: the **QEMU Object Model 
+(QOM)**, the **QEMU Device Model (qdev)** framework, and **XXXXX**. This 
+exploration aims to provide sufficient context for how the emulation process works so 
+that when reached the XXXX implementation section, the concepts and procedures 
+used there will not be entirely unfamiliar.
+
 %==== QOM ====%
 \input{Chapters/QEMU/3_qemu_dev_imp/QOM.tex}
 
