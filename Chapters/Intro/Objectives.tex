@@ -1,2 +1,45 @@
 \section{Objectives} 
 \label{chap:Objectives}
+
+During the academic year of the Master's in Electronic Systems, in the Embedded 
+Systems course, several laboratory exercises were conducted using the STM32F4-
+DISCOVERY board. These exercises typically employed the I²C communication 
+protocol. The main objective of this thesis is to contribute to the development of 
+the \textbf{MICROLAB} and \textbf{SIVALSE} projects by incorporating the I²C bus into 
+the STM32F4 microcontroller and accelerometer peripheral.
+
+To achieve this main goal, the following \textbf{specific objectives} have been defined:
+
+\begin{enumerate}
+    \item\textbf{Analyze and understand} the architecture of the STM32F405 microcontroller 
+        and the LIS3DH accelerometer, focusing on their communication through 
+        the Inter-Integrated Circuit (I$^2$C) protocol.\\\\
+    \textit{This theoretical and technical understanding provides the foundation for 
+        accurate emulation of real hardware behavior.}
+
+    \item \textbf{Develop an emulation model of the STM32F405 I$^2$C controller} within 
+        the QEMU virtualization framework.\\\\
+    \textit{The model must implement register-level behavior, protocol timing, and 
+        interrupt generation to ensure compatibility with embedded firmware.}
+
+    \item \textbf{Implement a virtual model of the LIS3DH accelerometer} as an I$^2$C 
+        slave device in QEMU.\\\\
+    \textit{This model will reproduce the sensor's registers, operating modes, and 
+        three-axis acceleration data output, allowing the emulated STM32F405 to interact 
+        with it as if it were a physical device.}
+
+    \item \textbf{Integrate both models into a unified virtual system} capable of executing 
+        real STM32 firmware within QEMU.\\\\
+    \textit{The integration must simulate the interaction between the microcontroller and 
+        the accelerometer accurately, supporting complete I$^2$C data exchanges.}
+
+    \item \textbf{Validate the emulated system through comparative testing} against 
+        the behavior of real hardware.\\\\
+    \textit{Firmware developed with STM32CubeIDE will be executed on both real and 
+        virtual platforms to confirm functional and behavioral equivalence.}
+
+    \item \textbf{Document and evaluate} the system's performance, limitations, and 
+        educational potential within the MICROLAB environment.\\\\
+    \textit{The results will serve as a reference for future integration of additional 
+        peripherals and tools to enhance virtual experimentation.}
+\end{enumerate}

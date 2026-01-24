@@ -1,24 +1,74 @@
 \chapter{Introduction}
 \label{chap:Intro}
 
-Technology, like most things, evolves, and with it, so do all related disciplines, 
-such as science and engineering, among others. And, in turn, the teaching of these 
-disciplines must also evolve.
+Invisible to many, but essential in modern society, microcontrollers, single-chip 
+computers designed specifically for use in device control, communications, or process 
+applications, have become fundamental elements in today's society. A single modern 
+car may have as 25 differences microcontrollers that perform tasks ranging from 
+audio system to global positioning systems, ignition control, engine control, and 
+suspension balancing \cite{EncyclopediaEmulation}. Many embedded systems use these devices as their core, 
+and these in turn are becoming increasingly common and influential in progressively 
+more critical sectors.Many embedded systems use these devices as their core, and 
+these, in turn, are becoming increasingly common and influential in progressively 
+more critical sectors. So much so that in 2024 the embedded systems market was 
+valued at USD 110 billion\cite{GMIEmbeddedMarket2026} \cite{ArmRecord}. Given this scenario, it is not difficult to imagine the 
+sector's need for professionals trained in their design, operation, and implementation.
 
-This thesis presents a QEMU-based emulation of the STM32F405 microcontroller 
-and the LIS3DH accelerometer, providing a virtual platform that runs unmodified 
-firmware and replicates the behavior of real devices. The intention with this virtual 
-environment is to replace some of the physical laboratory tools used in the 
-Master's Program in Electronic Systems Engineering at the Polytechnic University of 
-Madrid, allowing students to experiment with microcontroller peripherals and I²C-based 
-sensors using only their personal computers, while preserving the pedagogical 
-value of working closely with the hardware.
+To train qualified professionals, having the necessary hardware is essential, something 
+that is not always guaranteed, either in educational or professional settings. 
+Often, both individuals and institutions face budgetary constraints when making 
+decisions. In both educational and professional context, this translates into a lack 
+of equipment for conducting real-world exercises with embedded systems. Many 
+professionals agreed that one of the most challenging stages during project development 
+is debugging and testing, since identifying and correcting programming errors 
+is complex without access to the physical target hardware during development or 
+the appropriate tools\cite{EmbeddedMarketStudy2023}\cite{CodeThinkQemu2024}.
+
+In the educational sphere, the situation described in the previous paragraph is 
+even worse. Students at public universities, which receive hundreds of new students 
+each year, have very limited access to hardware. While the university itself usually 
+provides the hardware to students, the sheer number of students makes it impractical 
+for the university to provide one unit per student. This often forces students to 
+conduct laboratory work in pairs and/or to share equipment among different groups. 
+All of this limits students' opportunities to carry out independent experimentation.
+
+Currently, software tools exist that allow the creation of virtual environments 
+that emulate the behavior of real hardware, without the need for additional 
+hardware. The software-based hardware emulation offered by these tools is one of the 
+possible solutions to the problems mentioned above. By allowing software to be 
+run and tested without physical hardware, debugging and behavior analysis are 
+facilitated, and development time and costs are reduced. This is a clear advantage in 
+both professional and educational settings, as it allows each individual—whether a 
+student, professional, or anyone else with the goal of learning—to experiment 
+individually with their own hardware, while simultaneously avoiding the typical costs 
+and problems associated with real hardware, such as damaged circuit boards, wiring 
+errors, or missing components.
+
+The Polytechnic University of Madrid (UPM), as part of its Educational Innovation 
+projects, is developing \textbf{MICROLAB}\cite{MICROLAB2025} and \textbf{SIVALSE}\cite{SIVALSE2024}. These two initiatives 
+work together to address the educational problem described above. \textbf{SIVALSE} aims 
+to create an open-source development environment with simulation and automatic 
+validation tools to support challenge-based learning in electronic systems courses. 
+\textbf{MICROLAB}, using the \textbf{SIVALSE} development environment, seeks to provide a 
+virtual laboratory with a graphical interface for microcontroller-based electronic 
+systems, allowing students to interact with the microcontroller and basic electronic 
+components intuitively and in real time. All of this is achieved without the need for 
+additional hardware, aside from the computer on which they are run.
+
+%This thesis presents a QEMU-based emulation of the STM32F405 microcontroller 
+%and the LIS3DH accelerometer, providing a virtual platform that runs unmodified 
+%firmware and replicates the behavior of real devices. The intention with this virtual 
+%environment is to replace some of the physical laboratory tools used in the 
+%Master's Program in Electronic Systems Engineering at the Polytechnic University of 
+%Madrid, allowing students to experiment with microcontroller peripherals and I²C-based 
+%sensors using only their personal computers, while preserving the pedagogical 
+%value of working closely with the hardware.
 
 
 %Emulation is not a new concept. In computer engineering, emulation means that one 
 %system (the host) behaves like another (the guest), so that the latter's software 
 %and peripherals function without modification. This is the standard definition of 
-%emulation in computing \cite{1}. However, when applied specifically to hardware, the 
+%emulation in computing \cite{EncyclopediaEmulation}. However, when applied specifically to hardware, the 
 %goal is to reproduce registers, busses, timing behavior, and I/O interfaces so that 
 %the emulated device can be used in place of the original hardware system.
 %
@@ -32,16 +82,9 @@ value of working closely with the hardware.
 %program creates a virtual hardware environment that mimics processors, memory 
 %maps, and devices, so that firmware or operating systems compiled for the target 
 %board run without modification on the host.
-%
-%This thesis presents a QEMU-based emulation of the STM32F405 microcontroller 
-%and the LIS3DH accelerometer, providing a virtual platform that executes 
-%unmodified firmware and reproduces the behavior of real devices. 
-%The proposed environment aims to replace part of the physical laboratory setup, enabling students 
-%to experiment with microcontroller peripherals and I2C-based sensing using only 
-%their personal computers, while preserving the pedagogical value of working close to the hardware.
 
 %==== Motivation ====%
-\input{Chapters/Intro/Motivation.tex}
+%\input{Chapters/Intro/Motivation.tex}
 
 %==== Objectives ====%
 \input{Chapters/Intro/Objectives.tex}
