@@ -1,47 +1,81 @@
-\subsection{STM32F4xx Characteristics}
+\subsection{STM32F405 Characteristics}
 \label{chap:Back_ARM_STM32F4xx}
 
-The present thesis is centered in the emulation of the STM32F405's I2C protocol. 
-In this section, will be listed some of the STM32F405 features, extracted directly 
-from its datasheet\cite{STM32F405Datasheet2026}\cite{STM32CortexM42026}. This microcontroller is a high-performance 32-bit 
-microcontroller from STMicroelectronics, built around an Arm Cortex-M4 core with FPU, 
-and DSP extensions, and an adaptive real-time accelerator that enables zero-wait-state 
-code execution from Flash at clock frequencies up to 168 MHz. It delivers up 
-to around 210 DMIPS and includes a memory protection unit, making it suitable for 
-complex real-time embedded applications that require both high performance and 
-robust software isolation.
+In the Embedded Systems I course of the Master's in Electronic Systems at 
+the UPM, the STM32F4-DISCOVERY development board is used as part of the 
+course materials. This board incorporates an STM32F407VGT6 microcontroller 
+with a 32-bit Arm Cortex-M4 processor. However, since the STM32F407VGT6 
+is not yet directly implemented in the version of QEMU used in SIVALSE, the 
+STM32F405 microcontroller has been selected. It shares many similarities with 
+the STM32F407\cite{STM32F405Datasheet2026}\cite{STM32CortexM42026} and, in addition to the I²C protocol and other peripherals, 
+already has a solid implementation base. Since this thesis focuses on emulating the 
+STM32F405's I²C protocol, this section will list some of its features, taken directly 
+from its datasheet.
 
-In terms of memory, the STM32F405 integrates up to 1 MByte of embedded Flash 
-and up to 196 KBytes of SRAM, including a 64 KByte core-coupled memory (CCM) 
-region optimized for fast data access, along with OTP memory and a flexible static 
-memory controller for external SRAM, PSRAM, NOR, NAND, and CompactFlash 
-devices. The device operates from 1.8 V to 3.6 V, offers multiple clock sources 
-(external crystal, internal 16 MHz RC, and 32 kHz oscillators for RTC), and supports 
-several low-power modes (Sleep, Stop, Standby) with a dedicated VBAT domain for 
-RTC and backup registers, enabling energy-efficient designs that retain timekeeping 
-and critical data across power cycles.
+The STM32F405RG, part of STMicroelectronics' STM32F4 family, is based on 
+a 32-bit ARM Cortex-M4 core with a Floating Point Unit (FPU), support for DSP 
+instructions, an Adaptive Real-Time Accelerator (ART) for 0-wait execution from 
+Flash up to 168 MHz, a Memory Protection Unit (MPU), and 210 DMIPS of 
+performance. This configuration makes it an ideal microcontroller for embedded 
+systems with real-time and intensive processing requirements, such as motor 
+control, power conversion, and multimedia applications. It incorporates up to 1 MB 
+of Flash memory, up to 192+4 KB of SRAM (with 64 KB of CCM), and essential 
+peripherals: three 12-bit ADCs, two DACs, 17 timers, 16-stream DMA, three I2C ports, 
+multiple USART/SPI/CAN ports, Ethernet MAC, USB OTG HS/FS, and up to 
+140 fast, 5V-tolerant GPIOs. Its memory architecture maps peripherals between 
+0x40000000-0x5FFFFFFFF, as it shows in the table \ref{tab:ARM_memory_map}
 
-The STM32F405 features rich analog capabilities, including three 12-bit ADCs 
-with multi-channel and interleaved modes reaching multi-MSPS aggregate sampling 
-rates, as well as two 12-bit DACs for signal generation. It also provides a 
-16-stream general-purpose DMA controller with FIFO and burst support, a CRC unit, 
-a true random number generator, and a large timer subsystem with up to 17 timers 
-(16- and 32-bit) supporting capture/compare, PWM generation, pulse counting, 
-and quadrature encoder interfaces, making it well suited for motor control, 
-power conversion, and advanced control applications.
+\begin{table} [H]
+    \centering
+    \caption
+        {
+            STM32F405 Memory Map
+        }
+    \label{tab:ARM_memory_map}
+\end{table}
 
-On the digital I/O and connectivity side, the STM32F405 exposes up to 140 
-GPIOs (most of them fast and 5 V tolerant) and supports a wide range of communication 
-peripherals: up to three I2C controllers, multiple USART/UART interfaces 
-with support for protocols like LIN, IrDA, and ISO 7816, up to three SPI/I2S blocks, 
-two CAN 2.0B controllers, SDIO, and a parallel camera interface. Advanced connectivity 
-is further enhanced by an integrated Ethernet MAC with IEEE 1588v2 
-hardware timestamping and DMA, as well as full-speed and high-speed USB 2.0 
-OTG controllers with on-chip PHY and dedicated DMA, enabling the microcontroller 
-to serve as a communication hub in networked and multimedia embedded 
-systems.
 
-For development and system integration, the MCU includes a serial-wire/JTAG 
-debug interface, an Embedded Trace Macrocell for instruction tracing, an LCD 
-parallel interface, a real-time clock with calendar and subseconds, and a 96-bit 
-unique device ID that can be used for traceability or security-related features.
+%The present thesis is centered in the emulation of the STM32F405's I2C protocol. 
+%In this section, will be listed some of the STM32F405 features, extracted directly 
+%from its datasheet\cite{STM32F405Datasheet2026}\cite{STM32CortexM42026}. This microcontroller is a high-performance 32-bit 
+%microcontroller from STMicroelectronics, built around an Arm Cortex-M4 core with FPU, 
+%and DSP extensions, and an adaptive real-time accelerator that enables zero-wait-state 
+%code execution from Flash at clock frequencies up to 168 MHz. It delivers up 
+%to around 210 DMIPS and includes a memory protection unit, making it suitable for 
+%complex real-time embedded applications that require both high performance and 
+%robust software isolation.
+%
+%In terms of memory, the STM32F405 integrates up to 1 MByte of embedded Flash 
+%and up to 196 KBytes of SRAM, including a 64 KByte core-coupled memory (CCM) 
+%region optimized for fast data access, along with OTP memory and a flexible static 
+%memory controller for external SRAM, PSRAM, NOR, NAND, and CompactFlash 
+%devices. The device operates from 1.8 V to 3.6 V, offers multiple clock sources 
+%(external crystal, internal 16 MHz RC, and 32 kHz oscillators for RTC), and supports 
+%several low-power modes (Sleep, Stop, Standby) with a dedicated VBAT domain for 
+%RTC and backup registers, enabling energy-efficient designs that retain timekeeping 
+%and critical data across power cycles.
+%
+%The STM32F405 features rich analog capabilities, including three 12-bit ADCs 
+%with multi-channel and interleaved modes reaching multi-MSPS aggregate sampling 
+%rates, as well as two 12-bit DACs for signal generation. It also provides a 
+%16-stream general-purpose DMA controller with FIFO and burst support, a CRC unit, 
+%a true random number generator, and a large timer subsystem with up to 17 timers 
+%(16- and 32-bit) supporting capture/compare, PWM generation, pulse counting, 
+%and quadrature encoder interfaces, making it well suited for motor control, 
+%power conversion, and advanced control applications.
+%
+%On the digital I/O and connectivity side, the STM32F405 exposes up to 140 
+%GPIOs (most of them fast and 5 V tolerant) and supports a wide range of communication 
+%peripherals: up to three I2C controllers, multiple USART/UART interfaces 
+%with support for protocols like LIN, IrDA, and ISO 7816, up to three SPI/I2S blocks, 
+%two CAN 2.0B controllers, SDIO, and a parallel camera interface. Advanced connectivity 
+%is further enhanced by an integrated Ethernet MAC with IEEE 1588v2 
+%hardware timestamping and DMA, as well as full-speed and high-speed USB 2.0 
+%OTG controllers with on-chip PHY and dedicated DMA, enabling the microcontroller 
+%to serve as a communication hub in networked and multimedia embedded 
+%systems.
+%
+%For development and system integration, the MCU includes a serial-wire/JTAG 
+%debug interface, an Embedded Trace Macrocell for instruction tracing, an LCD 
+%parallel interface, a real-time clock with calendar and subseconds, and a 96-bit 
+%unique device ID that can be used for traceability or security-related features.
