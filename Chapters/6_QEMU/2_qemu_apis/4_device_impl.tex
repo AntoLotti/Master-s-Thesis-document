@@ -1,0 +1,358 @@
+\subsubsection{Implementing Buses and Hardware Devices}
+\label{chap:device_implementation}
+
+Having established the foundations of QOM and qdev, this section provides a practical guide for developers who wish to extend QEMU with new buses and hardware devices. The task of implementing a complete emulated device or bus in QEMU requires not only understanding the underlying frameworks, but also navigating the integration patterns and lifecycle conventions that QEMU enforces. This section bridges the gap between theoretical knowledge and practical implementation, offering a structured approach to device and bus development.
+
+\paragraph{Understanding the Device Implementation Hierarchy}
+
+Before implementing a new device or bus, developers must understand the inheritance hierarchy and the relationship between the different QEMU abstractions. All device implementations in QEMU follow a common pattern: they define a QOM type that inherits from either \texttt{DeviceState} (for devices) or \texttt{BusState} (for buses), override key lifecycle callbacks, and integrate into the parent bus hierarchy.
+
+The fundamental principle underlying all device implementations is the \textit{template method pattern}: QEMU defines a standardized lifecycle (instantiation, property setting, realization, reset, and destruction), and each device type provides callbacks—such as \texttt{realize()} and \texttt{reset()}—that execute at the appropriate stage. This ensures that all devices follow predictable initialization and operational patterns, regardless of their specific hardware functionality.
+
+\paragraph{The Device Implementation Pattern}
+
+Every device implementation in QEMU follows a consistent structure, typically organized into three main components: the instance structure, the class structure, and the type registration. Understanding this pattern is essential before writing any device code.
+
+\textit{Instance Structure:} The instance structure is a C struct that holds the runtime state unique to each device instance. This structure always begins with a \texttt{DeviceState} member (for devices) or \texttt{BusState} member (for buses), which provides the common device/bus infrastructure inherited from qdev. Following the initial \texttt{DeviceState}/\texttt{BusState} member, developers add fields for device-specific state, such as memory regions, GPIO arrays, interrupt lines, registers, and any other data the device model requires to function.
+
+For example, a hypothetical I2C device might declare:
+
+%\begin{lstlisting}[language=C, style=small, caption=Typical device instance structure]
+%typedef struct I2CDeviceState {
+%    DeviceState parent_obj;           /* qdev infrastructure */
+%    MemoryRegion mmio;                /* MMIO region for registers */
+%    qemu_irq irq;                     /* Interrupt line to CPU */
+%    uint8_t registers[0x100];         /* Register file */
+%    uint8_t data_buffer[256];         /* Internal data buffer */
+%} I2CDeviceState;
+%\end{lstlisting}
+
+The use of \texttt{parent\_obj} as the first member is critical; it allows safe pointer arithmetic for casting between the device-specific structure and the generic \texttt{DeviceState} through QEMU's \texttt{OBJECT()} macro family.
+
+\textit{Class Structure:} The class structure extends \texttt{DeviceClass} and holds the device-specific virtual methods and metadata. While the instance structure holds per-device state, the class structure holds shared behavior and configuration that applies to all instances of the type.
+
+A typical class structure definition might look like:
+
+%\begin{lstlisting}[language=C, style=small, caption=Typical device class structure]
+%typedef struct I2CDeviceClass {
+%    DeviceClass parent_class;         /* qdev class */
+%    /* Optional: device-specific class methods */
+%    void (*process_command)(I2CDeviceState *s, uint8_t cmd);
+%} I2CDeviceClass;
+%\end{lstlisting}
+
+The class structure is where developers define virtual methods (callbacks) that subclasses or board code can override. For most simple devices, the class structure may only contain \texttt{DeviceClass parent\_class} and perhaps one or two custom callbacks.
+
+\textit{Type Registration:} Once the instance and class structures are defined, the device must be registered with QEMU's type system using the \texttt{TYPE\_INFO} macro. This registration tells QEMU how to allocate, initialize, and destroy instances of the type. A typical registration looks like:
+
+%\begin{lstlisting}[language=C, style=small, caption=Device type registration]
+%static TypeInfo i2c_device_info = {
+%    .name          = TYPE_I2C_DEVICE,
+%    .parent        = TYPE_DEVICE,
+%    .instance_size = sizeof(I2CDeviceState),
+%    .class_size    = sizeof(I2CDeviceClass),
+%    .instance_init = i2c_device_init,
+%    .class_init    = i2c_device_class_init,
+%};
+
+%static void i2c_device_register_types(void)
+%{
+%    type_register_static(&i2c_device_info);
+%}
+%
+%type_init(i2c_device_register_types);
+%\end{lstlisting}
+
+The \texttt{type\_init()} macro ensures that the registration function is called when QEMU starts, before any device instantiation occurs. The \texttt{.instance\_init} callback (\texttt{i2c\_device\_init}) is invoked when an instance is first created; the \texttt{.class\_init} callback (\texttt{i2c\_device\_class\_init}) is invoked when the type is registered and is used to populate the virtual method table in the class structure.
+
+\paragraph{Device Lifecycle Implementation}
+
+The \texttt{.realize} callback is the most critical lifecycle hook that developers must implement. Unlike \texttt{instance\_init}, which runs early and should perform only lightweight initialization, \texttt{realize} runs after all properties have been set and is where the device should set up its memory regions, GPIO/IRQ lines, and perform any operations that depend on finalized configuration.
+
+A typical \texttt{realize} callback structure follows this pattern:
+%
+%\begin{lstlisting}[language=C, style=small, caption=Device realize callback pattern]
+%static void i2c_device_realize(DeviceState *dev, Error **errp)
+%{
+%    I2CDeviceState *s = I2C_DEVICE(dev);
+%    
+%    /* Validate properties */
+%    if (s->address == 0) {
+%        error_setg(errp, "I2C device address must be non-zero");
+%        return;
+%    }
+%    
+%    /* Create memory regions */
+%    memory_region_init_io(&s->mmio, OBJECT(dev), 
+%                          &i2c_device_mmio_ops, s, 
+%                          "i2c-device-mmio", 0x100);
+%    
+%    /* Initialize GPIO/IRQ */
+%    qdev_init_gpio_out_named(dev, &s->irq, "irq", 1);
+%    
+%    /* Initialize device state */
+%    memset(s->registers, 0, sizeof(s->registers));
+%    
+%    /* Call parent class realize (important!) */
+%    if (!qdev_realize(dev, NULL, errp)) {
+%        return;
+%    }
+%}
+%\end{lstlisting}
+
+The \texttt{error\_setg()} function is used for error reporting; if an error occurs during realization, the device is not marked as realized and will be cleaned up. The call to the parent class \texttt{realize} is important and ensures that the parent's initialization logic is executed.
+
+The \texttt{.reset} callback, called during system reset or device reset, should restore the device to its power-on state. Register values should be reset to their defaults, state machines reset to initial states, and any ongoing operations cancelled:
+
+\begin{lstlisting}[language=C, style=small, caption=Device reset callback pattern]
+static void i2c_device_reset(DeviceState *dev)
+{
+    I2CDeviceState *s = I2C_DEVICE(dev);
+    
+    /* Reset all registers to default values */
+    for (int i = 0; i < sizeof(s->registers); i++) {
+        s->registers[i] = i2c_device_register_defaults[i];
+    }
+    
+    /* Clear buffers */
+    memset(s->data_buffer, 0, sizeof(s->data_buffer));
+    
+    /* Deassert interrupt if needed */
+    qemu_irq_lower(s->irq);
+}
+\end{lstlisting}
+
+\paragraph{Memory Region Mapping and MMIO Handling}
+
+Devices that expose memory-mapped I/O (MMIO) must create \texttt{MemoryRegion} structures and integrate them into the parent bus's address space. The typical pattern is:
+
+1. \textbf{Create the MemoryRegion} in the \texttt{realize} callback using \texttt{memory\_region\_init\_io()}
+2. \textbf{Define MemoryRegionOps} with \texttt{.read} and \texttt{.write} callbacks
+3. \textbf{Add the region to the parent bus} using \texttt{memory\_region\_add\_subregion()}
+
+The \texttt{MemoryRegionOps} structure defines how reads and writes to the MMIO region are handled:
+
+\begin{lstlisting}[language=C, style=small, caption=MMIO operations definition]
+static uint64_t i2c_device_read(void *opaque, hwaddr addr, 
+                                unsigned size)
+{
+    I2CDeviceState *s = (I2CDeviceState *)opaque;
+    uint64_t value = 0;
+    
+    switch (addr) {
+    case 0x00:  /* Control register */
+        value = s->registers[0];
+        break;
+    case 0x04:  /* Status register */
+        value = s->registers[1];
+        break;
+    case 0x08:  /* Data register */
+        value = s->data_buffer[0];
+        /* Auto-advance read pointer on data register access */
+        memmove(s->data_buffer, s->data_buffer + 1, 255);
+        break;
+    default:
+        qemu_log_mask(LOG_GUEST_ERROR, 
+                      "I2C device: read from invalid address 0x%lx\n", addr);
+        break;
+    }
+    
+    return value;
+}
+
+static void i2c_device_write(void *opaque, hwaddr addr, 
+                             uint64_t value, unsigned size)
+{
+    I2CDeviceState *s = (I2CDeviceState *)opaque;
+    
+    switch (addr) {
+    case 0x00:  /* Control register */
+        s->registers[0] = value & 0xFF;
+        /* Handle side effects of control register writes */
+        i2c_device_handle_command(s, value);
+        break;
+    case 0x08:  /* Data register */
+        /* Append to output buffer */
+        if (s->output_count < sizeof(s->output_buffer)) {
+            s->output_buffer[s->output_count++] = value;
+        }
+        break;
+    default:
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "I2C device: write to invalid address 0x%lx\n", addr);
+        break;
+    }
+}
+
+static const MemoryRegionOps i2c_device_mmio_ops = {
+    .read  = i2c_device_read,
+    .write = i2c_device_write,
+    .endianness = DEVICE_NATIVE_ENDIAN,
+    .valid = {
+        .min_access_size = 1,
+        .max_access_size = 4,
+    },
+};
+\end{lstlisting}
+
+The \texttt{.endianness} field specifies the byte order; \texttt{DEVICE\_NATIVE\_ENDIAN} is appropriate for register files that match the guest CPU's endianness. The \texttt{.valid} field describes the allowed access sizes (some devices only accept 4-byte reads, others accept any size).
+
+\paragraph{GPIO and Interrupt Management}
+
+Devices communicate with other devices and the CPU through GPIO/IRQ lines. A device that triggers interrupts must:
+
+1. \textbf{Declare GPIO output lines} in \texttt{realize} using \texttt{qdev_init\_gpio\_out()}
+2. \textbf{Raise or lower the IRQ} during operation using \texttt{qemu_irq\_raise()} / \texttt{qemu\_irq\_lower()}
+
+A device that receives interrupts must:
+
+1. \textbf{Declare GPIO input lines} in \texttt{realize} using \texttt{qdev\_init\_gpio\_in()}
+2. \textbf{Provide a handler callback} that processes the incoming interrupt
+
+Example of a device with interrupt output:
+
+\begin{lstlisting}[language=C, style=small, caption=Device with interrupt output]
+/* In realize callback */
+qdev_init_gpio_out(dev, &s->irq, 1);
+
+/* When an event occurs that should trigger an interrupt */
+static void i2c_device_trigger_interrupt(I2CDeviceState *s)
+{
+    /* Set interrupt pending flag */
+    s->registers[1] |= 0x01;  /* Status register bit 0 = interrupt pending */
+    
+    /* Signal the interrupt to the CPU */
+    qemu_irq_raise(s->irq);
+    
+    /* In real hardware, the CPU would eventually ack the interrupt,
+       clearing the flag and lowering the line. For simplicity,
+       some models lower immediately after a delay. */
+}
+\end{lstlisting}
+
+Example of a device that receives GPIO input:
+
+\begin{lstlisting}[language=C, style=small, caption=Device with GPIO input]
+static void i2c_device_gpio_handler(void *opaque, int n, int level)
+{
+    I2CDeviceState *s = (I2CDeviceState *)opaque;
+    
+    if (level) {  /* GPIO line went high */
+        /* Handle rising edge (e.g., start condition in I2C) */
+        s->state = I2C_START;
+    } else {      /* GPIO line went low */
+        /* Handle falling edge (e.g., stop condition in I2C) */
+        s->state = I2C_IDLE;
+    }
+}
+
+/* In realize callback */
+qdev_init_gpio_in(dev, i2c_device_gpio_handler, 1);
+\end{lstlisting}
+
+\paragraph{Implementing a Custom Bus}
+
+A custom bus is created by defining a new QOM type that inherits from \texttt{BusState}. Buses serve as containers for devices and may define address allocation, protocol-specific behavior, or device discovery mechanisms.
+
+A minimal bus implementation requires:
+
+\begin{lstlisting}[language=C, style=small, caption=Custom bus implementation]
+typedef struct I2CBusState {
+    BusState parent_obj;
+    uint8_t sda_level;           /* I2C data line state */
+    uint8_t scl_level;           /* I2C clock line state */
+    I2CDevice *current_master;   /* Bus master */
+} I2CBusState;
+
+typedef struct I2CBusClass {
+    BusClass parent_class;
+} I2CBusClass;
+
+#define TYPE_I2C_BUS "i2c-bus"
+#define I2C_BUS(obj) OBJECT_CHECK(I2CBusState, (obj), TYPE_I2C_BUS)
+
+static void i2c_bus_class_init(ObjectClass *oc, void *data)
+{
+    BusClass *bc = BUS_CLASS(oc);
+    /* Bus-specific class initialization, if needed */
+}
+
+static TypeInfo i2c_bus_info = {
+    .name          = TYPE_I2C_BUS,
+    .parent        = TYPE_BUS,
+    .instance_size = sizeof(I2CBusState),
+    .class_size    = sizeof(I2CBusClass),
+    .class_init    = i2c_bus_class_init,
+};
+
+static void i2c_bus_register_types(void)
+{
+    type_register_static(&i2c_bus_info);
+}
+
+type_init(i2c_bus_register_types);
+\end{lstlisting}
+
+Devices attach to a bus through a parent-child relationship. A device controller that manages a bus typically creates the bus in its \texttt{realize} callback:
+
+\begin{lstlisting}[language=C, style=small, caption=Creating and exposing a bus from a device]
+static void i2c_controller_realize(DeviceState *dev, Error **errp)
+{
+    I2CControllerState *s = I2C_CONTROLLER(dev);
+    
+    /* Create the bus */
+    qbus_create(TYPE_I2C_BUS, dev, "i2c-bus");
+    
+    /* Bus is now available for device attachment */
+}
+\end{lstlisting}
+
+Devices then attach to the bus by specifying the bus type in their \texttt{.instance\_init} callback or through board code.
+
+\paragraph{Integration with Board Code}
+
+Devices are instantiated and connected to buses through board code. A typical board code pattern for STM32F405 might look like:
+
+\begin{lstlisting}[language=C, style=small, caption=Board code device instantiation and connection]
+static void stm32f405_board_init(void)
+{
+    DeviceState *cpu, *soc, *uart, *i2c_dev;
+    BusState *i2c_bus;
+    
+    /* Create the SoC (which contains the CPU, memory, and buses) */
+    soc = qdev_new(TYPE_STM32F405);
+    qdev_realize_and_unref(soc, NULL, &error_fatal);
+    
+    /* Get the I2C bus from the SoC */
+    i2c_bus = qdev_get_child_bus(soc, "i2c-bus");
+    
+    /* Create an I2C device (e.g., LIS3DH accelerometer) */
+    i2c_dev = qdev_new(TYPE_LIS3DH);
+    qdev_prop_set_uint8(i2c_dev, "address", 0x18);  /* Set I2C address */
+    qdev_realize_and_unref(i2c_dev, i2c_bus, &error_fatal);
+    
+    /* Connect device interrupts to SoC */
+    qdev_connect_gpio_out_named(i2c_dev, "irq", 0,
+                                qdev_get_gpio_in(soc, IRQ_I2C));
+}
+\end{lstlisting}
+
+This code demonstrates the lifecycle: create the SoC, get the I2C bus from it, create a device, set properties, and realize the device on the bus. The device is now part of the system and will receive reset, clock, and interrupt signals as needed.
+
+\paragraph{Key Conventions and Best Practices}
+
+When implementing devices and buses in QEMU, developers should follow several established conventions to ensure compatibility and maintainability:
+
+\textit{Naming Conventions:} Type names should be prefixed with a device-specific identifier (e.g., \texttt{TYPE\_LIS3DH}, \texttt{TYPE\_I2C\_BUS}). Macro accessors should be uppercase and use the \texttt{OBJECT\_CHECK()} or \texttt{OBJECT\_CAST()} family of macros to perform type-safe casting.
+
+\textit{Error Handling:} All device initialization and realization should report errors through the \texttt{Error **errp} parameter. This allows callers to propagate and handle errors gracefully without abruptly terminating QEMU.
+
+\textit{Register Semantics:} Register read and write operations should faithfully model the hardware behavior, including side effects (e.g., reading a status register that clears flags). If exact cycle-accurate timing is not required, it is acceptable to execute register operations immediately; however, clearing this expectation in comments is helpful to future maintainers.
+
+\textit{Interrupt Semantics:} Interrupt lines should follow the hardware convention: edge-triggered lines should be raised and then lowered; level-triggered lines should be held high until the interrupt condition is cleared.
+
+\textit{Logging and Debugging:} Use \texttt{qemu\_log\_mask()} to conditionally log operations. The \texttt{LOG\_GUEST\_ERROR} mask is appropriate for logging invalid register accesses; \texttt{LOG\_UNIMP} for unimplemented features.
+
+\paragraph{Summary}
+
+Implementing devices and buses in QEMU requires understanding the layered architecture of QOM, qdev, and memory management. By following the standardized patterns of type registration, lifecycle callbacks (\texttt{instance\_init}, \texttt{realize}, \texttt{reset}), and integration hooks (memory regions, GPIO/IRQ), developers can create robust, maintainable device models that integrate seamlessly into the QEMU ecosystem. The discipline of adhering to these patterns, while initially appearing verbose, yields significant benefits: predictable behavior, easy debugging, and compatibility with QEMU's system reset, migration, and introspection features.

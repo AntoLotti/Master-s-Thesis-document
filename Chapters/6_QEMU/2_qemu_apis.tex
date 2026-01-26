@@ -1,0 +1,57 @@
+\section{Internal QEMU APIs}
+\label{chap:qemu_apis}
+
+The device emulation is the mechanism by which QEMU represents hardware as 
+software objects executing on the host CPU. Unlike functional simulation—which 
+attempts to model device behavior at a high level of abstraction—QEMU device 
+emulation target for cycle-accurate and register-accurate fidelity. Understanding 
+how to create and integrate new devices and buses is crucial for any developer who 
+wants to emulate their own hardware in QEMU. Since this thesis will implement the 
+I2C protocol of a microcontroller and a complete peripheral device, it is convenient to 
+explain this process[1].
+
+\begin{table}[H]
+    \centering
+    \caption
+        {
+            Internal Subsystem
+        }
+
+    \label{tab:qemu_internal_subsystems}
+\end{table}
+
+Each major subsystem implements one or more **APIs** that define how other 
+components interact with it. This approach allows developers to implement new 
+hardware within the QEMU codebase without having to understand the internal 
+details of each subsystem, thus achieving modularity and code reusability. 
+Understanding these APIs is essential for contributing to QEMU or developing custom 
+emulators, particularly when implementing new devices and buses[2]
+
+\begin{table}[H]
+    \centering
+    \caption
+        {
+            Internal QEMU APIs
+        }
+
+    \label{tab:qemu_internal_apis}
+\end{table}
+
+This section of the chapter explores the subsytems ant their APIs that, in the 
+developer's opinion, are most important to understadn when implementing new 
+hardware in QEMU code: the **QEMU Object Model (QOM)**, the **QEMU 
+Device Model (qdev)**, and **XXXXX**. This exploration aims to provide 
+sufficient context on the operation of each so that, by the time you reach the XXXX 
+implementation section, the concepts and procedures used there will be familiar.
+
+%==== QOM ====%
+\input{Chapters/6_QEMU/2_qemu_apis/1_qom.tex}
+
+%==== qdev ====%
+\input{Chapters/6_QEMU/2_qemu_apis/2_qdev.tex}
+
+%==== memory ====%
+%\input{Chapters/6_QEMU/2_qemu_dev_imp/3_qemu_memory.tex}
+
+%==== Device Implementation ====%
+%\input{Chapters/6_QEMU/2_qemu_dev_imp/4_dev_impl.tex}
