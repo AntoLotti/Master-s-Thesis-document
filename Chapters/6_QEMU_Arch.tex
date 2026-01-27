@@ -1,36 +1,53 @@
 \chapter{QEMU Architecture}
 \label{chap:QEMU_Arch}
 
-A key aspect of this project was identifying a suitable hardware emulation 
-platform. In order to find the perfect platform, deeper analysis of the main problem 
-was done, revealing several essential requirements. If each student is to have 
-access to their own emulated hardware, the chosen emulator must be compatible with 
-both university workstations and students' personal laptops. Therefore, it should 
-be cross-platform and, ideally, require minimal storage space. In addition, and more 
-important, it must support realistic firmware execution: firmware compiled with 
-the same toolchain used for the physical hardware should behave identically in the 
-emulated environment.
+The core of this thesis project lies in the open-source tool QEMU (The Quick Emulator). 
+This thesis leverages a customized version of QEMU developed by the 
+SIVALSE project, based on official QEMU version 9.1.50, which is capable of 
+emulating the STM32F4 architecture—at the time of writing, QEMU's official release 
+stands at version 10.2.50—. This customized version of QEMU is the same one used 
+by MICROLAB to create the virtual laboratories.
 
-Under these conditions, several names were considered. Among them: Qemu, 
-Renode\cite{RenodeGitHub}, OVPsim\cite{OVPworld2025} and Keil/Proteus\cite{ProteusLabcenter}. Among these four, only QEMU and 
-Renode provide the necessary open-source licensing and building adaptability to 
-create and publish new device models for the STM32F405 + LIS3DH as part of 
-academic research. Although Renode is a very powerful tool, QEMU was the final 
-choice. Renode, despite being open source, is maintained by Antmicro, which is an 
-advantage, but it's a very new tool and not as well-known or widely used compared 
-to QEMU.
+QEMU is an open-source, is a generic and open source machine emulator and 
+virtualizer designed to emulate entire hardware architectures\cite{QemuProject}. Since its 
+creation by Fabrice Bellard in 2005\cite{WikiFabriceBellard}, many features and improvements have been 
+added to QEMU, transforming it into a great virtualization solution that supports 
+a wide range of CPU architectures—including x86, ARM, RISC-V, PowerPC, and 
+MIPS—making it a common choice in embedded systems development, validation, 
+and educational environments. Nowadays, QEMU offers multiple modes of 
+operation, each serving distinct use cases:
 
-QEMU is a system emulator that allows the virtualization of entire computer 
-systems, including various CPU architectures and their peripheral hardware. While 
-interesting, a comprehensive study of QEMU's behavior and components is beyond 
-the scope of this thesis. This chapter is designed to help any board or SoC developer 
-wishing to develop in QEMU understand its architecture and inner workings, focusing 
-on three essential subsystems: the Tiny Code Generator (TCG), which dynamically 
-translates guest CPU instructions into native host code; a complex Memory 
-Management model that creates hierarchical, multi-layered address spaces to 
-accurately emulate physical RAM, MMIO, and DMA; and the QEMU Object Model (QOM), 
-which provides a flexible framework for defining, instantiating, and 
-connecting emulated hardware devices\cite{Bellard2005Qemu}.
+\begin{itemize}
+    \item \textbf{Full-system emulation:    }In this mode QEMU provides complete virtual machine emulation with virtual CPU, memory, and emulated peripherals.
+    \item \textbf{User-mode emulation:      }Running individual applications compiled for different architectures than the guest system. In this mode QEMU emulates only the CPUs. It executes guest instructions, captures system calls, and sends them to the host kernel. 
+    \item \textbf{Hardware-virtualization:  }QEMU use hardware extensions like KVM or Xen to emulate the guest code, with near-native performance, though requiring the guest and host to share the same instruction set architecture.
+\end{itemize}
+
+Regardless of the mode, at the highest level QEMU operates as a conventional 
+userspace **N2** application on the host operating system, Figure \ref{fig:full_system_emulation}. In the 
+current thesis, due the necessity to emulates a entire developer board containing the 
+STM32F405 microcontroller, including the memory, the peripherals, the buses and the firmware, 
+QEMU is executed in full system emulation mode.
+
+\begin{figure}[htbp]
+    \centering
+%    \includegraphics[width=0.7\textwidth]{Resources/Draw/Full-system.pdf}
+    \caption{Full system emulation architecture.}
+    \label{fig:full_system_emulation}
+\end{figure}
+
+The device emulation is the mechanism that represents hardware as software 
+objects executing on the host CPU. Unlike functional simulation—which attempts to 
+model the behavior of the device at a higher level of abstraction—QEMU's device 
+emulation target for cycle-accurate and register-accurate fidelity. Understanding 
+the inner workings of QEMU and how to create and integrate new devices and 
+buses is essential for developers emulating custom hardware. Since this thesis 
+implements both the STM32F405 microcontroller's I2C controller and the LIS3DH 
+accelerometer as an I2C slave, understanding QEMU's internal structure and its 
+most important elements and subsystems is It is considered necessary. This chapter 
+of the thesis explains the concepts necessary to understand how QEMU translates 
+guest instructions into host machine code and how to add new hardware to the 
+QEMU system.
 
 %==== Machine Code Translation ====%
 \input{Chapters/6_QEMU/1_qemu_translation.tex}
