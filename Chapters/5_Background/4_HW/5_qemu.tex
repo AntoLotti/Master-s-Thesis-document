@@ -7,19 +7,19 @@ analyses, which will be explained later in this document. This section of the ch
 aims to introduce QEMU as a tool, A in-depth analysis of the tool will be done in 
 the next chapter XXXX.
 
-The Quick Emulator or or as it is mostly known QEMU\cite{QemuProject}, is a generic and 
+The Quick Emulator or as it is mostly known QEMU, is a generic and 
 open source machine emulator and virtualizer that allows the user operating 
 systems and programs designed for one machine architecture on a completely different 
-architecture. Created by Fabrice Bellard\cite{WikiFabriceBellard}, QEMU has evolved into a sophisticated 
+architecture. Created by Fabrice Bellard, QEMU has evolved into a sophisticated 
 virtualization solution that supports a wide range of CPU architectures including 
 x86, ARM, RISC-V, PowerPC, and MIPS. 
 
-QEMU operates through dynamic binary translation Dynamic Binary Translation 
-(DBT), based on JIT compilation, to achieve fast emulation speed. The use 
-of DBT enables running binary code generated for a target (or a guest) processor 
-on another host processor, which has an entirely different ISA. This means that it 
-translates the binary code associated to the target CPU into the instructions of the 
-host CPU. Then, it executes the translated instructions on the host CPU.
+QEMU operates through Dynamic Binary Translation (DBT), based on JIT 
+compilation, to achieve fast emulation speed. The use of DBT enables running 
+binary code generated for a target (or a guest) processor on another host processor, 
+which has an entirely different ISA. This means that it translates the binary code 
+associated to the target CPU into the instructions of the host CPU. Then, it executes 
+the translated instructions on the host CPU.
 
 Since its release in 2005, many features have been added to QEMU, such as 
 peripheral support, support for different architectures, virtualisation and performance 
