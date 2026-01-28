@@ -1,4 +1,4 @@
-\subsection{QEMU Device Model (Qdev)}
+\subsubsection{QEMU Device Model (Qdev)}
 \label{chap:qemu_qdev}
 
 While the QOM provides the infrastructure for the creation and the handling 
@@ -46,10 +46,9 @@ reset behavior. And finally, QDev also supports hotplug, permitting devices to b
 dynamically added or removed at runtime, though this feature is less critical for 
 bare-metal microcontroller emulation than for system-level scenarios.
 
-Like the QOM API, QDev also has its main types of C structures. There are 
-three types of C structures that developers should be familiar with: **DeviceClass**, 
-**DeviceState**, and **BusState**. Of these, the one developers should be familiar 
-with is **DeviceClass**, since all device types inherit from **DeviceClass**, which 
-in turn extends **ObjectClass**.
+Similar to the QOM API, there are several key elements of the QDev API that 
+will be used and mentioned throughout the thesis. These elements are described in 
+Annex~\ref{ann:qemu_c_structures} and will be more important in section XXXX.
+
 
 -**C2**

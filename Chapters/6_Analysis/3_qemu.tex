@@ -1,12 +1,15 @@
-\chapter{QEMU}
-\label{chap:QEMU_Arch}
+\section{QEMU}
+\label{chap:analysis_qemu}
 
 The core of this thesis project lies in the open-source tool QEMU (The Quick Emulator). 
 This thesis leverages a customized version of QEMU developed by the 
 SIVALSE project, based on official QEMU version 9.1.50, which is capable of 
 emulating the STM32F4 architecture—at the time of writing, QEMU's official release 
 stands at version 10.2.50—. This customized version of QEMU is the same one used 
-by MICROLAB to create the virtual laboratories.
+by MICROLAB to create the virtual laboratories. This part of the chapter aims to explain the necessary concepts to understand how QEMU translates 
+guest instructions into host machine code and how to add new hardware to the 
+QEMU system.
+
 
 QEMU is an open-source, is a generic and open source machine emulator and 
 virtualizer designed to emulate entire hardware architectures\cite{QemuProject}. Since its 
@@ -44,13 +47,10 @@ the inner workings of QEMU and how to create and integrate new devices and
 buses is essential for developers emulating custom hardware. Since this thesis 
 implements both the STM32F405 microcontroller's I2C controller and the LIS3DH 
 accelerometer as an I2C slave, understanding QEMU's internal structure and its 
-most important elements and subsystems is It is considered necessary. This chapter 
-of the thesis explains the concepts necessary to understand how QEMU translates 
-guest instructions into host machine code and how to add new hardware to the 
-QEMU system.
+most important elements and subsystems is It is considered necessary. 
 
 %==== Machine Code Translation ====%
-\input{Chapters/6_QEMU/1_qemu_translation.tex}
+\input{Chapters/6_Analysis/3_qemu/1_qemu_translation.tex}
 
 %==== QOM ====%
-\input{Chapters/6_QEMU/2_qemu_apis.tex}
+\input{Chapters/6_Analysis/3_qemu/2_qemu_apis.tex}

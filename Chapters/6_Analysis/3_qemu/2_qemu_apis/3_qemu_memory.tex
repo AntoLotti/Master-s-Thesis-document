@@ -1,0 +1,59 @@
+\subsubsection{QEMU Memory}
+\label{chap:qemu_memory}
+
+At its highest level, QEMU is simply another user-space application on the host 
+operating system. However, unlike other user-space applications, QEMU must 
+manage the modeling of a guest machine's entire memory hierarchy, including RAM, 
+memory-mapped I/O (MMIO) devices, ROM, and other specialized controllers. To 
+accomplish this monumental task, QEMU has a memory subsystem, which in turn 
+has an API. This memory API provides several abstraction layer that QEMU uses to model 
+and manage the memory and I/O address spaces of virtual machines. Its main 
+responsibilities are:
+
+\begin{enumerate}
+    \item \textbf{Address Space Representation:} 
+        Organize memory into a hierarchy that reflects the guest's physical address space
+    \item \textbf{Memory Type Support:    }
+        Model different memory types (RAM, ROM, MMIO, IOMMU, containers, aliases).
+    \item \textbf{Performance:            }
+        Maintaining translation caches and utilizing efficient lookup structures to minimize address translation overhead.
+    \item \textbf{Address Translation:    }
+        Efficiently translate guest addresses to host memory pointers or device callbacks.
+    \item \textbf{Dynamic Topology:       }
+        Support dynamic changes to the memory map (region add/remove, hotplug).
+    \item \textbf{Acceleration Support:   }
+        Provide hooks for KVM, Xen, and other accelerators.
+    \item \textbf{Migration Support:      }
+        Track memory regions for state migration. 
+\end{enumerate}
+
+
+There are two important concepts in the QEMU memory model that must be 
+understood: \textbf{MemoryRegions} and \textbf{AddressSpaces}. Understanding them is essential 
+for a better grasp of the memory hierarchy and how accesses to guest memory are 
+transformed into host operations. MemoryRegions are the fundamental building 
+blocks that represent individual memory fragments (RAM, MMIO regions, ROM, 
+aliases, containers) that form a hierarchical tree structure, while an AddressSpace is 
+a complete graphical window that provides a CPU or device with access to a specific 
+root MemoryRegion and its entire subtree. MemoryRegions define what memory exists; 
+AddressSpaces define who can access it and how. There are multiple types of memory regions, all represented by a 
+single C type \texttt{MemoryRegion}\cite{Qemu_MMIO_Ops}:
+
+\begin{itemize}
+    \item \textbf{RAM Regions:          }
+        Represent ordinary guest RAM.
+    \item \textbf{MMIO Regions:         }
+        Represent memory-mapped I/O devices accessed via callback functions. Each read or write causes a callback to be called on the host.  
+    \item \textbf{ROM Regions:          }
+        Represent read-only memory (firmware, bootloaders). Reading from ROM accesses host memory directly, but writes either are silently ignored or invoke callbacks (in ROM device variant).
+    \item \textbf{IOMMU Region:         }
+        An IOMMU region translates addresses of accesses made to it and forwards them to some other target memory region. As the name suggests, these are only needed for modelling an IOMMU, not for simple devices. 
+    \item \textbf{Container Regions:    }
+        Represent hierarchical groupings of other memory regions, organizing complex address spaces. Useful for grouping several regions into one unit. For example, a PCI BAR may be composed of a RAM region and an MMIO region.
+    \item \textbf{Alias Region:         }
+        Allow a subsection of one MemoryRegion to be mapped at a different location in the address space, enabling memory remapping without duplication. Aliases reference an offset and size within their target region.
+    \item \textbf{Reservation region:   }
+        Represent a reservation region is primarily for debugging. It claims I/O space that is not supposed to be handled by QEMU itself. The typical use is to track parts of the address space which will be handled by the host kernel when KVM is enabled.
+\end{itemize}
+
+- info mtree
