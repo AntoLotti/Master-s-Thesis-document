@@ -5,18 +5,15 @@ While the QOM provides the infrastructure for the creation and the handling
 of objects in QEMU, these are generic and they do not specifically address the 
 requirements of hardware device modeling. As result, QEMU Device API (QDev) 
 was designed to covered this gap. This QEMU's API is a specialized framework built 
-atop QOM that abstracts the complexities of emulated hardware devices, buses, and 
-their interactions. It's important to denote that, because QDev is implemented as a 
-QOM-based extension, each QDev device is itself a QOM object, meaning it inherits 
+atop QOM because of this, each QDev device is itself a QOM object, meaning it inherits 
 QOM's type system, introspection, and dynamic property mechanisms.
 
-Qdev works as a layer that unify the description, creation, connection, and 
-configuration of the emulated hardware components—ensuring that every device, 
-regardless of its specific peripheral function, follows consistent patterns for initialization, 
+Qdev functions as an abstraction layer for the device lifecycle, unifying the 
+description, creation, connection, and configuration of the emulated hardware components,
+and ensuring that every device, regardless of its specific peripheral function, follows consistent patterns for initialization, 
 property management, lifecycle stages, and system integration. The device-specific 
 capabilities that Qdev introduce for hardware emulation includes: DeviceClass, 
-Lifecycle Stages, Bus Abstraction, GPIO/IRQ System, Reset Propagation, Hotplug Support
-
+Lifecycle Stages, Bus Abstraction, GPIO/IRQ System, Reset Propagation, Hotplug Support.
 
 Most of the capabilities mentioned are achieved through several layers of 
 abstraction in order to standardize and simplify the creation of emulated hardware to 
