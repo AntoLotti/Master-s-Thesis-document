@@ -1,12 +1,17 @@
-\appendix 
 \chapter{Important C Data Structures}
 \label{ann:qemu_c_structures}
 
-\subsubsection{QOM API Core Elements}
+\section{QOM API Core Elements} 
 
-\textbf{ObjectClass:}\cite{Qemu_QOM_API} Analogous to a class in any OOP language, the C \\ 
+\textbf{ObjectClass:} Analogous to a class in any OOP language, the C \\ 
 \texttt{ObjectClass} structure represents the metadata that describe a type and that is 
-shared by all instances of that type. It holds:
+shared by all instances of that type. It holds\cite{Qemu_QOM_API}:
+
+\lstinputlisting[
+  language=C,
+  caption={\texttt{ObjectClass}},
+  label={code:ObjectClass}
+]{Code/qom/ObjectClass.c}
 
 \begin{itemize}
     \item \textbf{Type information}: Unique identifier for runtime type checking
@@ -15,10 +20,16 @@ shared by all instances of that type. It holds:
     \item \textbf{Shared class properties}: Default values and metadata for all instances
 \end{itemize}
 
-\textbf{Object:}\cite{Qemu_QOM_API} Every object in QEMU inherits from the C \texttt{Object} structure, which 
+\textbf{Object:} Every object in QEMU inherits from the C \texttt{Object} structure, which 
 is the fundamental component of the entire type system. Each individual object 
 is an \textbf{object instance} with its own state, which can be instantiated, configured, 
 introspected, and destroyed. Each \texttt{Object} instance encapsulates:
+
+\lstinputlisting[
+  language=C,
+  caption={\texttt{Object}},
+  label={code:Object}
+]{Code/qom/Object.c}
 
 \begin{itemize}
     \item \textbf{Type identification} via a class pointer
@@ -28,9 +39,15 @@ introspected, and destroyed. Each \texttt{Object} instance encapsulates:
                                         organization
 \end{itemize}
 
-\textbf{TypeInfo:}\cite{Qemu_QOM_API} The C \texttt{TypeInfo} structure is the complete blueprint for registering 
+\textbf{TypeInfo:} The C \texttt{TypeInfo} structure is the complete blueprint for registering 
 a new QOM type at QEMU startup. This structure tells QEMU exactly how to create, initialize, 
 and manage instances of the QOM type.
+
+\lstinputlisting[
+  language=C,
+  caption={\texttt{TypeInfo}},
+  label={code:TypeInfo}
+]{Code/qom/TypeInfo.c}
 
 \begin{itemize}
     \item Type name and parent class (e.g., parent=\texttt{"sysbus-device"})
@@ -40,14 +57,21 @@ and manage instances of the QOM type.
     \item Class initialization callback (\texttt{class\_init}) where virtual methods are assigned
 \end{itemize}
 
-This will be referenced later in XXXX, but it serves to exemplify the use of 
-the \texttt{TypeInfo} structure. The \texttt{STM32I2CClass} is registered via \texttt{TypeInfo} with 
+To exemplify the use of the \texttt{TypeInfo} structure: The \texttt{STM32I2CClass} is registered via \texttt{TypeInfo} with 
 parent=\texttt{'sysbus-device'}, \texttt{instance\_size=sizeof(STM32I2CState)}, and 
 \texttt{class\_init} \texttt{=stm32\_i2c\_class\_init}. This registration enables QEMU to instantiate the I$^2$C 
 controller and configure its base address, interrupt lines, and master/slave modes at 
 runtime.
 
-\textbf{ObjectProperty:}\cite{Qemu_QOM_API} Each object's configurable properties—e.g., base addresses, 
+\textbf{ObjectProperty:} Each object's configurable properties—e.g., base addresses, 
 enable bits, interrupt vectors—are registered via \texttt{ObjectProperty} descriptors. These 
 define getters/setters, type metadata, and default values, enabling firmware 
 configuration without recompilation.
+
+\section{QEMU Memory}
+
+\lstinputlisting[
+  language=C,
+  caption={\texttt{MemoryRegion}},
+  label={code:MemoryRegion}
+]{Code/memory/memoryregion.c}
