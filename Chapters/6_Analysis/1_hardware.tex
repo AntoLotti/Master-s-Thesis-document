@@ -1,11 +1,28 @@
 \section{Hardware}
 \label{chap:analysis_hardware}
 
-% texto que explique las razones de STM32 y de LIS3DH %
+The NUCLEO-F411RE, NUCLEO-F446RE, and STM32F411E-DISCO development 
+boards are among those used by the UPM in certain degree programs, such as 
+the Data Acquisition Systems course in the Data Systems Engineering degree 
+program, or in the Electronic Systems Laboratory of the MUISE. Although different, 
+these development boards share a common element: they all use an STM32F4xxx 
+microcontroller as their main component. The NUCLEO-F411RE\cite{NUCLEOF411RE2026}, NUCLEO-F446RE\cite{NUCLEOF446RE2026}, 
+and STM32F411E-DISCO\cite{STM32F411Discovery2026} boards use the STM32F411RET6\cite{STM32F411ReferenceManual2023}, the 
+STM32F446RET6\cite{STM32F446ReferenceManual2023}, and the STM32F411VET6 microcontrollers, respectively. 
+Different models, but with the same root (stm32f4 in their names), indicate that all 
+three microcontrollers have a 32-bit Arm Cortex-M4 processor. Unfortunately, none 
+of these microcontrollers are directly implemented in the SIVALSE QEMU version. 
+However, the STM32F405 microcontroller is. While this is not surprising, given that 
+they share the same manufacturer and the same Arm Cortex-M4 architecture, an 
+analysis of the reference manuals for all four microcontrollers, specifically regarding 
+the I2C protocol, reveals that they share a basic I2C controller architecture. 
+During the analysis, no register-level differences were observed between them, but 
+even if variations existed that went undetected, a QEMU implementation of the I2C 
+protocol for the STM32F405 could serve as a fundamental basis for future I2C 
+implementations of these microcontrollers, requiring only model-specific adjustments.
 
-%==== QEMU ====%
+%==== stm32f405 ====%
 \input{Chapters/6_Analysis/1_hardware/1_stm32f05.tex}
 
-% Mapa de memoria %
-
-% I2C %
+%==== LIS3DH ====%
+\input{Chapters/6_Analysis/1_hardware/2_lis3dh.tex}

@@ -39,18 +39,14 @@ QEMU's DBT takes the named of the Tiny Code Generator (TCG), and the basic
 code fragments it analyzes are called Translation Blocks (TB). In the case of QEMU's 
 TCG, the TBs are defined by using any instruction that changes the control flow of 
 the program—jump or return instructions, interruptions or peripherals accesses—as 
-boundaries\cite{QemuTCGOpsDevel}\cite{QemuTCGDirectBlockChaining}.
-
-The translation performed by the TCG consists of two phases: converting the host 
-code into a sequence of micro-operations and turning these micro-operations 
-into executable code\cite{QemuTCGTechReport}. The figure \ref{fig:tcg} illustrates the general architecture and 
-workflow of the TCG. Where the "Destination Machine Code" corresponds to a TB, the 
-XXX portion of the diagram represents the TCG, and the last block represents the 
-"Host Machine Code".
+boundaries\cite{QemuTCGOpsDevel}\cite{QemuTCGDirectBlockChaining}. The translation performed by the TCG consists of two phases: 
+converting the host code into a sequence of micro-operations and turning these micro-operations 
+into executable code\cite{QemuTCGTechReport}. The figure \ref{fig:tcg} illustrates the general 
+architecture and workflow of the TCG.
 
 \begin{figure}[H]
     \centering
-%    \includegraphics[width=0.5\textwidth]{Resources/Draw/TCG.png}
+    \includegraphics[width=0.75\textwidth]{Resources/Imagenes/TCG.png}
     \caption{Tiny Code Generator}
     \label{fig:tcg}
 \end{figure}

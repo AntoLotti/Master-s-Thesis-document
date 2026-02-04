@@ -1,0 +1,117 @@
+\subsection{LIS3DH}
+\label{chap:analysis_lis3dh}
+
+Other elements intended for inclusion in the virtual laboratory, and which are 
+part of the UPM laboratory equipment, are all the sensors from the Arduino Sensor 
+Kit~\cite{seeedstudio_sensor_kit} by seeedStudio, including the LIS3DH accelerometer. This three-axis 
+accelerometer, designed by STMicroelectronics, which has a digital output with an 
+I2C interface, was selected in this thesis for integration into QEMU and to test the 
+I2C interface of the emulated STM32F405 microcontroller.
+
+\subsubsection{Characteristics}
+
+The LIS3DH~\cite{LIS3DHDatasheet2016} is an ultra-low-power, high-performance, three-axis 
+linear accelerometer belonging to the "nano" family, with a standard I2C/SPI digital 
+serial interface output. The device features ultra-low-power operating modes for 
+advanced energy savings and integrated intelligent functions, as well as a 32-level 
+FIFO that can store up to 32 complete sets of samples.
+
+The LIS3DH provides three-dimensional acceleration measurement with a 
+selectable dynamic range of ±2 g, ±4 g, ±8 g, and ±16 g, depending on the required 
+use case. The data output resolution is 16 bits. The device is capable of generating 
+output data rates (ODR) from 1 Hz to 5.3 kHz, covering applications ranging from 
+low-power real-time monitoring to high-frequency event capture. The current 
+consumption of the LIS3DH varies significantly depending on the operating mode: in 
+full operation mode, it can reach approximately 70 µA, while in low power modes, 
+it drops to as low as 2 µA, a critical feature for battery-powered applications.
+
+\subsubsection{Registers}
+
+The LSI3DH has 31 eight-bit registers allocated to the address space. These 
+registers are responsible for both device configuration and access to measurement 
+data and status information. Each of these aspects is controlled by a different set 
+of registers. This section of the chapter will analyze the most relevant ones. A table 
+with the accelerometer's memory map can be found in Appendix \ref{ann:memories_maps}.
+
+This STMelectronics accelerometer has three operating modes: low-power mode, 
+normal mode, and high-resolution mode. These operating modes are defined by 
+setting the LPen bit in CTRL\_REG1 and the HR bit in CTRL\_REG4, Table \ref{tab:lis3dh_modes}. 
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|l|l|}
+        \hline
+        \textbf{Mode} & \textbf{LPen} & \textbf{HR} & \textbf{Resolution} & \textbf{Characteristics} \\
+        \hline
+        Low-Power   &   1   & 0 &   8-bit   & Highest power efficiency,\\
+                                            &&&&8-bit left-shifted data \\
+        \hline
+        Normal      &   0   & 0 &   10-bit  & Balanced power/performance,\\
+                                            &&&&10-bit left-shifted data \\
+        \hline
+        High-Resolution & 0 & 1 &   12-bit  & Maximum precision,\\ 
+                                            &&&& 12-bit left-shifted data \\
+        \hline
+    \end{tabular}
+    \caption{LIS3DH operating modes and resolution}
+    \label{tab:lis3dh_modes}
+\end{table}
+
+The output data rate is configured using the ODR[3:0] bits of the CTRL\_REG1 
+register, table \ref{tab:lis3dh_odr}. This register also contains the individual enable bits (Xen, Yen, 
+Zen) for each measurement axis.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|cccc|l|}
+        \hline
+        \textbf{ODR3} & \textbf{ODR2} & \textbf{ODR1} & \textbf{ODR0} & \textbf{Power Mode / Output Data Rate} \\
+        \hline
+        0 & 0 & 0 & 0 & Power-down \\
+        0 & 0 & 0 & 1 & HR/Normal/Low-power: 1~Hz \\
+        0 & 0 & 1 & 0 & HR/Normal/Low-power: 10~Hz \\
+        0 & 0 & 1 & 1 & HR/Normal/Low-power: 25~Hz \\
+        0 & 1 & 0 & 0 & HR/Normal/Low-power: 50~Hz \\
+        0 & 1 & 0 & 1 & HR/Normal/Low-power: 100~Hz \\
+        0 & 1 & 1 & 0 & HR/Normal/Low-power: 200~Hz \\
+        0 & 1 & 1 & 1 & HR/Normal/Low-power: 400~Hz \\
+        1 & 0 & 0 & 0 & Low-power: 1.60~kHz \\
+        1 & 0 & 0 & 1 & HR/Normal: 1.344~kHz; Low-power: 5.376~kHz \\
+        \hline
+    \end{tabular}
+    \caption{lis3dh data rate configuration}
+    \label{tab:lis3dh_odr}
+\end{table}
+
+As explained in its specifications, the LIS3DH supports four measurement ranges: 
+±2 g, ±4 g, ±8 g, and ±16 g. These are configured using bits FS[1:0] in the 
+CTRL\_REG4 register. The range affects both the maximum measurable acceleration 
+and the sensitivity. Table \ref{tab:lis3dh_fs} summarizes this:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|l|l|l|}
+        \hline
+        \textbf{FS[0:1]} & \textbf{Range} & \textbf{Range (mg)}
+            & \textbf{$S_{0}$ Normal} & \textbf{$S_{0}$ High-Res} & \textbf{$S_{0}$ Low-Power} \\
+        \hline
+        00  &   ±2g     & ±2000 mg      & 4 mg/LSB      & 1 mg/LSB      &  16 mg/LSB\\
+        01  &   ±4g     & ±4000 mg      & 8 mg/LSB      & 2 mg/LSB      &  32 mg/LSB\\
+        10  &   ±8g     & ±8000 mg      & 16 mg/LSB     & 4 mg/LSB      &  64 mg/LSB\\
+        11  &   ±16g    & ±16000 mg     & 48 mg/LSB     & 12 mg/LSB     &  192 mg/LSB\\
+        \hline
+    \end{tabular} 
+    \caption{lis3dh full-scale ranges and sensitivities}
+    \label{tab:lis3dh_fs}
+\end{table}
+
+The LSI3DH stores acceleration measurement data in the output data registers: 
+OUT\_X\_L/H, OUT\_Y\_L/H, and OUT\_Z\_L/H. A very important feature of these 
+registers is that their values are expressed in left-justified two's complement. Regarding 
+the interruptions, the LIS3DH has two independent interrupt lines, INT1 and INT2. These can 
+be configured to signal different types of events, significantly reducing the 
+computational load on the host processor. The device supports three categories of 
+interrupts: data interrupts (data ready and FIFO status), inertial event interrupts (axis 
+movement, wake-up, freefall, and 6D/4D orientation detection), and click detection 
+interrupts. The CTRL\_REG3 and CTRL\_REG6 control registers determine which 
+events are routed to INT1 and INT2, respectively.

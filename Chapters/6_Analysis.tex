@@ -1,8 +1,27 @@
 \chapter{Analysis}
 \label{chap:analysis}
 
-%==== QEMU ====%
+Although not part of the scope of this Master's thesis, the ultimate goal is the 
+creation of a virtual laboratory as a teaching tool for microcontrollers. This virtual 
+laboratory, which uses QEMU as its emulation platform, aims to emulate development boards 
+with ARM processors and the peripherals used in the UPM laboratories. 
+This Master's thesis aims to contribute to the creation of this teaching tool 
+by incorporating the I2C protocol into these boards, as well as including one of the 
+peripherals used as an I2C slave.
+
+This chapter will analyze the selected hardware, the reasons for its selection, and 
+the design decisions made before its implementation in QEMU. It will also analyze 
+the basis used to create the verification firmware—the firmware used to test the 
+behavior of the emulated hardware. While the tools used during the project's 
+development were already mentioned in sectio \ref{chap:back_tools} of the previous chapter, due to 
+Its importance, this chapter will also include an analysis of the inner workings of 
+the QEMU emulation tool.
+
+%==== Hardware ====%
 \input{Chapters/6_Analysis/1_hardware.tex}
+
+%==== Firmware ====%
+\input{Chapters/6_Analysis/2_firmware.tex}
 
 %==== QEMU ====%
 \input{Chapters/6_Analysis/3_qemu.tex}

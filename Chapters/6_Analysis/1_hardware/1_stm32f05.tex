@@ -1,38 +1,160 @@
 \subsection{STM32F405}
-\label{chap:Back_STM32F405}
+\label{chap:analysis_stm32f05}
 
-In the Embedded Systems I course of the Master's in Electronic Systems at 
-the UPM, the STM32F4-DISCOVERY development board is used as part of the 
-course materials. This board incorporates an STM32F407VGT6 microcontroller 
-with a 32-bit Arm Cortex-M4 processor. However, since the STM32F407VGT6 
-is not yet directly implemented in the version of QEMU used in SIVALSE, the 
-STM32F405 microcontroller has been selected. It shares many similarities with 
-the STM32F407\cite{STM32F405Datasheet2026}\cite{STM32CortexM42026} and, in addition to the I²C protocol and other peripherals, 
-already has a solid implementation base. Since this thesis focuses on emulating the 
-STM32F405's I²C protocol, this section will list some of its features, taken directly 
-from its datasheet.
 
-The STM32F405RG, part of STMicroelectronics' STM32F4 family, is based on 
-a 32-bit ARM Cortex-M4 core with a Floating Point Unit (FPU), support for DSP 
-instructions, an Adaptive Real-Time Accelerator (ART) for 0-wait execution from 
-Flash up to 168 MHz, a Memory Protection Unit (MPU), and 210 DMIPS of 
-performance. This configuration makes it an ideal microcontroller for embedded 
-systems with real-time and intensive processing requirements, such as motor 
-control, power conversion, and multimedia applications. It incorporates up to 1 MB 
-of Flash memory, up to 192+4 KB of SRAM (with 64 KB of CCM), and essential 
-peripherals: three 12-bit ADCs, two DACs, 17 timers, 16-stream DMA, three I2C ports, 
-multiple USART/SPI/CAN ports, Ethernet MAC, USB OTG HS/FS, and up to 
-140 fast, 5V-tolerant GPIOs. Its memory architecture maps peripherals between 
-0x40000000-0x5FFFFFFFF, as it shows in the table \ref{tab:ARM_memory_map}
+The STM32F405[ref], part of STMicroelectronics' STM32F4 family, is based 
+on a 32-bit ARM Cortex-M4 core with a Floating Point Unit (FPU), support for 
+DSP instructions, an Adaptive Real-Time Accelerator (ART) for 0-wait execution 
+from Flash up to 168 MHz, a Memory Protection Unit (MPU), and 210 DMIPS 
+of performance. This configuration makes it an ideal microcontroller for embedded 
+systems with real-time and intensive processing requirements, such as motor control, 
+power conversion, and multimedia applications. It incorporates up to 1 MB of Flash 
+memory, up to 192+4 KB of SRAM (with 64 KB of CCM), and essential peripherals: 
+three 12-bit ADCs, two DACs, 17 timers, 16-stream DMA, three I2C ports, multiple 
+USART/SPI/CAN ports, Ethernet MAC, USB OTG HS/FS, and up to 140 fast, 
+5V-tolerant GPIOs.
 
-\begin{table} [H]
-    \centering
-    \caption
-        {
-            STM32F405 Memory Map
-        }
-    \label{tab:ARM_memory_map}
-\end{table}
+\subsubsection{STM32F405 I2C}
+
+As explained previously, It has been decided to add emulation of the I2C \\
+STM32F405 communication protocol to QEMU. This microcontroller has three I2C 
+peripherals (I2C1, I2C2, I2C3), each providing a fully compliant I2C bus interface. 
+These peripherals automatically manage bus-specific sequencing, protocol 
+management, arbitration, and timing, simplifying firmware development and ensuring 
+robust communication. A Summary of the main capabilities of the STM32F405\cite{STM32F405Datasheet2026}:
+
+\begin{itemize}
+    \item I2C standard compliance, with 7-bit and 10-bit addressing modes.
+    \item Dual-speed modes: 
+        \begin{itemize}
+            \item Standard mode(Sm), up to 100 kHz.
+            \item Fast mode(Fm) up to 400 kHz.
+        \end{itemize}
+    \item Master-slave operation, with multi-master capability and clock expansion support.
+    \item Hardware packet error checking (PEC) using the CRC-8 polynomial for increased reliability.
+    \item DMA support for efficient data transfers without CPU intervention. 
+    \item Dual interrupt vectors: one for successful communication events and one for error conditions.
+\end{itemize}
+
+A design decision made prior to implementation was to focus I2C development 
+exclusively on master mode, as this represents the operating context in which the 
+STM32F405 communicates with the LIS3DH accelerometer. The emulated 
+microcontroller's firmware initiates all I2C transactions, while the LIS3DH device model 
+responds as a slave. This design decision simplifies the scope of the emulation while 
+maintaining full functional reliability for the intended use case.
+
+
+\subsubsection{STM32F405 I2C Registers}
+
+The STM32F405 I2C peripheral operates through a set of memory-mapped 
+registers that control all aspects of bus communication\cite{STM32F405ReferenceManual2021}. Understanding this register 
+architecture is fundamental to accurate emulation, as firmware interacts with the 
+peripheral exclusively through register read and write operations. The register set 
+can be functionally categorized into four groups:
+
+\begin{itemize}
+    \item \textbf{Control Registers:} The registers I2C\_CR1 and I2C\_CR2
+    \item \textbf{Timing Configuration Registers:} The registers I2C\_CCR and I2C\_TRISE
+    \item \textbf{Data and Address Registers:} The registers I2C\_DR and I2C\_OAR1
+    \item \textbf{Status Registers:} The registers I2C\_SR1 and I2C\_SR2
+\end{itemize}
+
+Among these register groups, the control registers, status registers, and the 
+I2C\_DR register will have the greatest impact on emulation. On the other hand, 
+the I2C\_OAR1 register is irrelevant, as it only defines the slave address of the 
+peripheral when the microcontroller is operating in slave mode. Regarding the timing 
+configuration registers, it was decided not to implement their associated logic. This 
+is because QEMU, to emulate the operation of the I2C protocol, provides a series 
+of functions that execute the different stages of the I2C communication protocol 
+without considering timing. Therefore, it is not currently necessary to analyze 
+these registers.
+
+For implementation in the emulator, it is crucial to understand the logic of the 
+control and status registers, as well as the I2C\_DR register. The I2C\_DR register, 
+the data register, functions as a bidirectional data buffer between the firmware and the 
+I2C shift register. The control registers, I2C\_CR1 and I2C\_CR2, on the other hand, 
+serve as the main interface for peripheral control and trigger transitions between 
+the different phases of the I2C protocol. Specifically, the I2C\_CR2 register contains 
+the bits that configure clock generation and interrupt control, while the I2C\_CR1 
+register contains, among others, the following bits:
+
+\begin{itemize}
+    \item \textbf{PE}, which enables the use of I2C communication itself.
+    \item \textbf{START}, which generates the start condition on the bus.
+    \item \textbf{STOP}, which is responsible for generating the stop condition on the bus and terminating communication.
+    \item \textbf{ACK}, the acknowledgment bit, which controls whether the peripheral generates an acknowledgment pulse after receiving a byte, which is essential for multibyte read operations.
+\end{itemize}
+
+
+Following the previous explanation, the status registers contain information about 
+certain conditions that have been met during a specific operation and that can be 
+taken into account in subsequent operations. The I2C\_SR2 register contains bits 
+with information about the bus status, including the MSL bit, which indicates the 
+current operating mode, the BUSY bit, which reflects bus activity, and the TRA 
+bit, which shows the current data direction. The I2C\_SR1 register, on the other 
+hand, provides real-time visibility into communication events and error conditions. 
+The key indicators in this register are:
+
+\begin{itemize}
+    \item \textbf{SB:     }Set when a START condition (master mode) has been generated.
+    \item \textbf{ADDR:   }Set when the address byte has been successfully transmitted.
+    \item \textbf{BTF:    }Set when both the shift register and the data register are empty/full.
+    \item \textbf{TxE:    }Set when the data register is empty and ready for new data.
+    \item \textbf{RxNE:   }Set when the data register contains received data. 
+    \item \textbf{AF:     }This is established when no acknowledgment is received from the slave.
+\end{itemize}
+
+\subsubsection{STM32F405 I2C Sequences}
+
+
+To ensure maximum fidelity between the I2C protocol of the real hardware and 
+the I2C of the emulated hardware, not only must the individual logic of each register 
+be the same as that of the real hardware, but the behavior of the registers as a whole 
+must comply with the expected generation of events of the I2C protocol.
+
+The STM32F405 microcontroller reference manual defines the transmit and 
+receive sequences necessary to establish I2C communication. These sequences contain 
+the precise operations and register transitions that the firmware must perform at 
+each stage of the communication. A model emulating the behavior of this I2C 
+interface must be able to recognize these operations and register transitions and 
+generate the corresponding I2C events, such as sending the START, STOP, or ACK signals.
+These sequence are represented in the Annexe~\ref{ann:i2c_sequences}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%In the Embedded Systems I course of the Master's in Electronic Systems at 
+%the UPM, the STM32F4-DISCOVERY development board is used as part of the 
+%course materials. This board incorporates an STM32F407VGT6 microcontroller 
+%with a 32-bit Arm Cortex-M4 processor. However, since the STM32F407VGT6 
+%is not yet directly implemented in the version of QEMU used in SIVALSE, the 
+%STM32F405 microcontroller has been selected. It shares many similarities with 
+%the STM32F407\cite{STM32F405Datasheet2026}\cite{STM32CortexM42026} and, in addition to the I²C protocol and other peripherals, 
+%already has a solid implementation base. Since this thesis focuses on emulating the 
+%STM32F405's I²C protocol, this section will list some of its features, taken directly 
+%from its datasheet.
+%
+%The STM32F405RG, part of STMicroelectronics' STM32F4 family, is based on 
+%a 32-bit ARM Cortex-M4 core with a Floating Point Unit (FPU), support for DSP 
+%instructions, an Adaptive Real-Time Accelerator (ART) for 0-wait execution from 
+%Flash up to 168 MHz, a Memory Protection Unit (MPU), and 210 DMIPS of 
+%performance. This configuration makes it an ideal microcontroller for embedded 
+%systems with real-time and intensive processing requirements, such as motor 
+%control, power conversion, and multimedia applications. It incorporates up to 1 MB 
+%of Flash memory, up to 192+4 KB of SRAM (with 64 KB of CCM), and essential 
+%peripherals: three 12-bit ADCs, two DACs, 17 timers, 16-stream DMA, three I2C ports, 
+%multiple USART/SPI/CAN ports, Ethernet MAC, USB OTG HS/FS, and up to 
+%140 fast, 5V-tolerant GPIOs. Its memory architecture maps peripherals between 
+%0x40000000-0x5FFFFFFFF, as it shows in the table \ref{tab:ARM_memory_map}
+%
+%\begin{table} [H]
+%    \centering
+%    \caption
+%        {
+%            STM32F405 Memory Map
+%        }
+%    \label{tab:ARM_memory_map}
+%\end{table}
 
 
 %The present thesis is centered in the emulation of the STM32F405's I2C protocol. 

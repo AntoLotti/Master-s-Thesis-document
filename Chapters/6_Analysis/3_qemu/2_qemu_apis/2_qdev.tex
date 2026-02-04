@@ -5,7 +5,7 @@ While the QOM provides the infrastructure for the creation and the handling
 of objects in QEMU, these are generic and they do not specifically address the 
 requirements of hardware device modeling. As result, QEMU Device API (QDev) 
 was designed to covered this gap. This QEMU's API is a specialized framework built 
-atop QOM because of this, each QDev device is itself a QOM object, meaning it inherits 
+on top of QOM, because of this, each QDev device is itself a QOM object, meaning it inherits 
 QOM's type system, introspection, and dynamic property mechanisms.
 
 Qdev functions as an abstraction layer for the device lifecycle, unifying the 
@@ -23,9 +23,14 @@ could lead to a spiral of confusion about how and why things are done in QEMU.
 The device lifecycle is the first thing Qdev applies, providing a guide with several 
 standardized phases to ensure that the firmware running on QEMU can reliably interact 
 with devices through predictable boot sequences and initialization patterns. 
-The **F1** show this process.
+The Figure \ref{fig:dev_life} show this process.
 
-- **F1**
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{Resources/Imagenes/qdev_life.png}
+    \caption{Devices Lifecycle}
+    \label{fig:dev_life}
+\end{figure}
 
 The second element provided by QDev is a bus abstraction layer, which will be 
 especially relevant later in this thesis for emulating the STM32F405 address map. 
@@ -34,21 +39,32 @@ but are organized hierarchically and connected to buses. These buses manage
 address allocation, establish parent-child relationships, and handle address translation 
 for memory-mapped I/O. This is fundamental for emulating microcontrollers with 
 multiple peripherals, each occupying different memory regions and responding to 
-specific addresses on the bus. Table T1 shows a list of common QEMU buses 
+specific addresses on the bus. Table \ref{tab:qemu_bus_types} shows a list of common QEMU buses 
 and their purpose.
 
-- **T1**
+\begin{table}[H]
+    \centering
+    
+    \begin{tabular}{l r}
+        \toprule
+        \textbf{Bus Type} & \textbf{Purpose} \\
+        \midrule
+        \textbf{System Bus (sysbus)} & Default; memory-mapped devices \\
+        \textbf{I$^2$C Bus} & I$^2$C protocol; slave devices \\
+        \textbf{PCI Bus} & Peripheral Component Interconnect \\
+        \textbf{SPI Bus} & Serial Peripheral Interface \\
+    \bottomrule
+    \end{tabular}
+    \caption{QEMU Bus Types and Their Purposes}
+    \label{tab:qemu_bus_types}
+\end{table}
+
+
 
 Fourth, QDev implements reset propagation, allowing a system reset command 
 to cascade through the entire device tree, ensuring all peripherals return to their 
 initial states in the correct order—essential for firmware that relies on peripheral 
 reset behavior. And finally, QDev also supports hotplug, permitting devices to be 
 dynamically added or removed at runtime, though this feature is less critical for 
-bare-metal microcontroller emulation than for system-level scenarios.
-
-Similar to the QOM API, there are several key elements of the QDev API that 
-will be used and mentioned throughout the thesis. These elements are described in 
-Annex~\ref{ann:qemu_c_structures} and will be more important in section XXXX.
-
-
--**C2**
+bare-metal microcontroller emulation than for system-level scenarios. Similar to the QOM API, in Annex~\ref{ann:qemu_c_structures} there are several key elements of the QDev API that 
+will be used and mentioned throughout the thesis.

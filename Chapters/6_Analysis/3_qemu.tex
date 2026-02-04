@@ -1,16 +1,6 @@
 \section{QEMU}
 \label{chap:analysis_qemu}
 
-The core of this thesis project lies in the open-source tool QEMU (The Quick Emulator). 
-This thesis leverages a customized version of QEMU developed by the 
-SIVALSE project, based on official QEMU version 9.1.50, which is capable of 
-emulating the STM32F4 architecture—at the time of writing, QEMU's official release 
-stands at version 10.2.50—. This customized version of QEMU is the same one used 
-by MICROLAB to create the virtual laboratories. This part of the chapter aims to explain the necessary concepts to understand how QEMU translates 
-guest instructions into host machine code and how to add new hardware to the 
-QEMU system.
-
-
 QEMU is an open-source, is a generic and open source machine emulator and 
 virtualizer designed to emulate entire hardware architectures\cite{QemuProject}. Since its 
 creation by Fabrice Bellard in 2005\cite{WikiFabriceBellard}, many features and improvements have been 
@@ -27,14 +17,14 @@ operation, each serving distinct use cases:
 \end{itemize}
 
 Regardless of the mode, at the highest level QEMU operates as a conventional 
-userspace **N2** application on the host operating system, Figure \ref{fig:full_system_emulation}. In the 
+userspace\footnotemark{1} application on the host operating system, Figure \ref{fig:full_system_emulation}. In the 
 current thesis, due the necessity to emulates a entire developer board containing the 
 STM32F405 microcontroller, including the memory, the peripherals, the buses and the firmware, 
 QEMU is executed in full system emulation mode.
 
 \begin{figure}[htbp]
     \centering
-%    \includegraphics[width=0.7\textwidth]{Resources/Draw/Full-system.pdf}
+    \includegraphics[width=0.75\textwidth]{Resources/Imagenes/full-sys.png}
     \caption{Full system emulation architecture.}
     \label{fig:full_system_emulation}
 \end{figure}
@@ -48,6 +38,10 @@ buses is essential for developers emulating custom hardware. Since this thesis
 implements both the STM32F405 microcontroller's I2C controller and the LIS3DH 
 accelerometer as an I2C slave, understanding QEMU's internal structure and its 
 most important elements and subsystems is It is considered necessary. 
+
+\footnotetext[1]{
+    The term user space (or userland) refers to all code that runs outside the operating system's kernel
+}
 
 %==== Machine Code Translation ====%
 \input{Chapters/6_Analysis/3_qemu/1_qemu_translation.tex}

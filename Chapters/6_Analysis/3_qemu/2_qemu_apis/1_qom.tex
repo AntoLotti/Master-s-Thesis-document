@@ -1,5 +1,5 @@
 \subsubsection{QEMU Object Model (QOM)}
-\label{chap:QEMU_QOM}
+\label{chap:qemu_qom}
 
 The QEMU Object Model (QOM) subsystem is QEMU's object-oriented framework. 
 This subsystem provides a device modeling abstraction layer by implements a 
@@ -54,14 +54,31 @@ well-defined framework. The figure~\ref{fig:qom_management} illustrates the scop
 within QEMU.
 
 \begin{figure}[H]
-    \centering
-%    \includegraphics[width=0.7\textwidth]{Resources/Draw/Full-system.pdf}
+    \dirtree{%
+        .1 QOM Subsystem Controls.
+        .2 Type Registration.
+        .3 Type names ("device-type").
+        .3 Inheritance hierarchy.
+        .3 Virtual methods (class\_init).
+        .3 Type metadata (TypeInfo).
+        .2 Object Instantiation.
+        .3 Creating objects via type names.
+        .3 Memory allocation/deallocation.
+        .3 Reference counting.
+        .3 Initialization/finalization.
+        .2 Property Management.
+        .3 Dynamic property definitions.
+        .3 Property get/set callbacks.
+        .3 Property type conversion.
+        .3 Default values.
+        .2 Object Organization.
+        .3 Parent-child composition tree.
+        .3 Object paths (/machine/cpu[0]).
+        .3 Path resolution.
+        .3 Interface implementation.
+    }
     \caption{QOM Management Scope}
     \label{fig:qom_management}
 \end{figure}
 
-There are several key elements that need to be known and understood about 
-the QOM API, such as the \texttt{ObjectClass}, \texttt{Object}, \texttt{ObjectProperty} and \texttt{TypeInfo} 
-structures, which were used during the implementation and development of this 
-thesis. These and other elements, which will be mentioned throughout the thesis, 
-are explained in the Appendix~\ref{ann:qemu_c_structures}.
+There are several important elements of the QOM API that were used during the implementation and development of this thesis and that need to be understood. Among these elements, the ones most frequently mentioned throughout the document are the structures \texttt{ObjectClass}, \texttt{Object}, \texttt{ObjectProperty}, and \texttt{TypeInfo}. Since their explanation can be somewhat technical, it has been included in an appendix at the end of the document. Appendix ~\ref{ann:qemu_c_structures}.

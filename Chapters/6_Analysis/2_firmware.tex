@@ -1,0 +1,6 @@
+\section{STM32 HAL}
+\label{chap:analysis_firmware}
+
+STMicroelectronics provides a software framework called the STM32 Hardware Abstraction Layer (HAL)\cite{stmicroelectronics_stm32f4_hal}. This framework enables programmers to deal with STM32 peripherals by providing methods that abstract the peripheral's complexity while maximizing code portability throughout the full STM32 product line. Firmware developers can setup and connect with the peripherals using HAL methods like `HAL\_I2C\_Mem\_Read()` and `HAL\_I2C\_Mem\_Write()` instead of directly modifying hardware registers. This allows the same application code to run on several STM32 variations with little change.
+
+In the context of this thesis, the LIS3DH emulation model is designed to achieve full API compatibility with the physical sensor's HAL drivers. By faithfully implementing the I2C sub-addressing protocol, register semantics, and interrupt behavior, as specified in the STMicroelectronics datasheet, the emulated sensor allows unmodified STM32CubeF4 HAL code to run identically in the QEMU environment as it would in real hardware.

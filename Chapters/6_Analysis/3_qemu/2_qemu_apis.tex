@@ -10,31 +10,21 @@ charge of a critical part of the process and hiding lower-level details from the
 Abstraction Layer). To implement these layers of abstraction, and with the goal 
 to achieve a modular and a maintainable code, QEMU's internal architecture was 
 structured as a set of different subsystems, working together to manage device 
-emulation, memory modeling, interrupt handling, and system orchestration[1].
+emulation, memory modeling, interrupt handling, and system orchestration\cite{QemuInternalsDocumentation2026}.
 
 Each major subsystem implements one or more APIs that define how other 
 components interact with it. This approach allows developers to implement new 
 hardware within the QEMU codebase without having to understand the internal 
 details of each subsystem, thus achieving modularity and code reusability. 
 Understanding these APIs is essential for contributing to QEMU or developing custom 
-emulators, particularly when implementing new devices and buses[2].
-
-\begin{table}[H]
-    \centering
-    \caption
-        {
-            Internal QEMU APIs
-        }
-
-    \label{tab:qemu_internal_apis}
-\end{table}
+emulators, particularly when implementing new devices and buses\cite{QemuAPIDocumentation2026}.
 
 This section of the chapter explores the subsytems ant their APIs that, in the 
 developer's opinion, are most important to understadn when implementing new 
 hardware in QEMU code: the QEMU Object Model (QOM), the QEMU Device 
-Model (qdev), and XXXXX. This exploration aims to provide sufficient context on 
-the operation of each so that, by the time you reach the XXXX 
-implementation section, the concepts and procedures used there will be familiar.
+Model (qdev), and the QEMU memory APIs. This exploration aims to provide sufficient context on 
+the operation of each so that, by the time te reader reach 
+the implementation in Chapter \ref{chap:implementation}, the concepts and procedures used there will be familiar.
 
 %==== QOM ====%
 \input{Chapters/6_Analysis/3_qemu/2_qemu_apis/1_qom.tex}
@@ -46,7 +36,7 @@ implementation section, the concepts and procedures used there will be familiar.
 \input{Chapters/6_Analysis/3_qemu/2_qemu_apis/3_qemu_memory.tex}
 
 %==== memory ====%
-\input{Chapters/6_Analysis/3_qemu/2_qemu_apis/4_qtest.tex}
+%\input{Chapters/6_Analysis/3_qemu/2_qemu_apis/4_qtest.tex}
 
 %==== Device Implementation ====%
 %\input{Chapters/6_QEMU/2_qemu_dev_imp/4_dev_impl.tex}
