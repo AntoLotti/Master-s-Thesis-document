@@ -46,10 +46,10 @@ device management through the implementation of:
 
 
 QOM's type system is foundational to QEMU device modeling. Every 
-emulated peripheral (timers, ADCs, I2C controllers) is a QOM Object instance with 
+emulated peripheral (timers, ADCs, I$^2$C controllers) is a QOM Object instance with 
 an ObjectClass defining its behavior. This abstraction decouples device logic from 
 QEMU core, enabling researchers to develop and validate new device models—such 
-as the STM32F405 I2C controller developed in this thesis—within a consistent, 
+as the STM32F405 I$^2$C controller developed in this thesis—within a consistent, 
 well-defined framework. The figure~\ref{fig:qom_management} illustrates the scope of QOM's management 
 within QEMU.
 

@@ -1,0 +1,98 @@
+\chapter{Conclusions and Future Work}
+
+This thesis has successfully achieved the six specific objectives defined in 
+Chapter~\ref{chap:Intro}, making a significant contribution to the MICROLAB 
+and SIVALSE projects through the complete emulation of the I$^2$C protocol on the 
+STM32F405 microcontroller and LIS3DH accelerometer within the QEMU framework. 
+Table~\ref{tab:objetivos} summarizes the achievement of each objective with 
+quantitative metrics extracted from the developed artifacts.
+
+
+The most significant technical contribution is the  complete implementation of the 
+STM32F405 I$^2$C controller, which faithfully reproduces the register-level behavior of the peripheral according to Its
+Reference Manual. This model implements a finite state machine (FSM) with 12 
+states that translates firmware register write/read sequences (CR1.START, CR1.ACK, 
+DR writes, etc.) into QEMU I$^2$C bus events, supporting 7-bit master mode, EV/ER 
+interrupts, and full compatibility with the STM32CubeIDE HAL 
+library.
+
+Additionally, a complete LIS3DH accelerometer model  was developed 
+as an I$^2$C slave device that reproduces the 64-register map from the datasheet, supports all three operating modes (Normal/High-Res/
+Low-Power), generates DRDY interrupts on INT1, and exposes 
+QOM properties (\texttt{accel-x/y/z}, \texttt{temp}) for controlled test data 
+injection. Integration into the \texttt{netduinoplus2} machine enables execution of 
+real STM32 firmware that configures the LIS3DH via I$^2$C1 (address 0x18), reads 
+acceleration data, and responds to EXTI1 interrupts, thus validating end-to-end HAL 
+compatibility.
+
+The results demonstrate that the emulated system is  functionally equivalent to 
+the physical hardware  for MICROLAB educational use cases: I$^2$C initialization, 
+control register writes (CTRL\_REG1-6), multi-byte reads with auto-increment 
+(OUT\_X/Y/Z\_L/H), and data-ready interrupt handling. This contribution enables 
+virtual I$^2$C laboratories without physical hardware, facilitating remote teaching 
+and self-paced learning in Embedded Systems.
+
+\begin{table}[H]
+  \centering
+  
+  \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{6cm}|l|>{\raggedright\arraybackslash}X|}
+    \hline
+    \textbf{Objective} & \textbf{Achievement Status} & \textbf{Key Contributions} \\
+    \hline
+    Analyze STM32F405 and LIS3DH architecture focusing on I$^2$C protocol & 
+    Fully Achieved   & 
+    Comprehensive analysis in Chapter 6 with datasheet breakdowns, register maps, protocol timing diagrams. \\
+    \hline
+    Develop STM32F405 I$^2$C controller emulation in QEMU & 
+    Fully Achieved   & 
+    Complete implementation. FSM with 11 states, full register support, EV/ER interrupts. Compatible with STM32 HAL library. \\
+    \hline
+    Implement LIS3DH accelerometer as I$^2$C slave in QEMU & 
+    Fully Achieved   & 
+    Complete model. 64-register map, 3 operating modes, QOM properties for accel injection, DRDY interrupt generation. \\
+    \hline
+    Integrate models into unified virtual system executing real STM32 firmware & 
+    Fully Achieved   & 
+    Extended \texttt{netduinoplus2} machine. SoC integration with correct memory mapping and NVIC routing. \\
+    \hline
+    Validate using STM32 HAL firmware in STM32CubeIDE & 
+    Fully Achieved   & 
+    Validated with HAL I$^2$C driver: init, multi-byte R/W, auto-increment, interrupt handling. Test cases passed: register config, acceleration reads, DRDY interrupts. \\
+    \hline
+  \end{tabularx}
+  \caption{Project Objectives Achievement Summary}
+  \label{tab:objetivos}
+\end{table}
+
+\newpage
+\section{Future Work}
+
+Although the objectives have been met, clear extension opportunities exist that would 
+enhance MICROLAB's educational impact:
+
+\begin{itemize}
+  \item \textbf{I$^2$C Controller Expansion}: Implement slave mode, 10-bit 
+  addressing, timing registers (CCR, TRISE), DMA transfers, and SMBus/PMBus to 
+  support advanced UPM laboratory cases.
+  
+  \item \textbf{LIS3DH Model Improvements}: Add FIFO buffer (32 levels), click/tap 
+  detection (CLICK\_CFG), threshold interrupts (INT1\_CFG), complete temperature 
+  sensor, and auxiliary ADC channels, achieving 100\% datasheet coverage.
+  
+  \item \textbf{Automated Testing Framework}: Develop QTest test cases to validate 
+  HAL sequences (init, read/write, error conditions) and edge cases (NACK handling, 
+  bus arbitration), along with STM32CubeIDE validation firmware for continuous 
+  regression testing.
+  
+  \item \textbf{MICROLAB Visualizer Integration}: Expose I$^2$C bus state (SCL/SDA 
+  timing, START/STOP/DATA transactions) and LIS3DH registers via WebSocket for 
+  real-time visualization in the React interface.
+  
+  \item \textbf{Scalability to Other Peripherals}: Apply this methodology to emulate 
+  UART/USART, SPI, and ADC on the STM32F405, creating a complete virtual laboratory 
+  for the STM32F4-DISCOVERY board compatible with all Embedded Systems laboratory 
+  exercises.
+\end{itemize}
+
+These extensions would maintain the educational focus, prioritizing HAL firmware 
+compatibility and observability for teaching purposes.

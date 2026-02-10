@@ -1,2 +1,4 @@
-build/
-99_drawio/
+build/*
+!build/Thesis.pdf
+/Resources/old
+/Resources/99_drawio

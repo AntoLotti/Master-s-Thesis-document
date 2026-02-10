@@ -1,0 +1,63 @@
+\subsection{QEMU Object Model Integration}
+\label{sec:imp_qom_integration}
+
+The STM32F4xx I$^2$C controller emulation is integrated into QEMU's Object Model (QOM) through the following declarations:
+
+\begin{lstlisting}[
+    language=C,
+    caption={QOM macros},
+    label={code:qom_macros_1}]
+#define TYPE_STM32F4XX_I2C "stm32f4xx-i2c"
+OBJECT_DECLARE_SIMPLE_TYPE(STM32F4XXI2CState, STM32F4XX_I2C)
+\end{lstlisting}
+
+\textbf{\texttt{TYPE\_STM32F4XX\_I2C}} defines the unique QOM type identifier string 
+\\ \texttt{"stm32f4xx-i2c"}, enabling device instantiation via \texttt{qdev\_new(TYPE\_\\STM32F4XX\_I2C)} and \texttt{object\_initialize\_child()} calls throughout the SoC emulation.
+\textbf{\texttt{OBJECT\_DECLARE\_SIMPLE\_TYPE}} establishes the type-safe relationship between the \texttt{STM32F4XXI2CState} instance structure and its QOM type, automatically generating casting macros.
+
+\subsubsection{Device Lifecycle}
+\label{subsec:lifecycle}
+
+The first thing QEMU does is register the device within its kernel. This is done with the \texttt{type\_init} macro. This macro is called before the main Qemu macro.
+
+\begin{lstlisting}[
+    language=C,
+    caption={\texttt{type\_init} macro},
+    label={code:type_init}]
+type_init(stm32f4xx_i2c_register_types)
+\end{lstlisting}
+
+The \texttt{TypeInfo} structure that represents the I2C controller is the following
+
+\begin{lstlisting}[
+    language=C,
+    caption={\texttt{TypeInfo} structure},
+    label={code:TypeInfo}]
+static const TypeInfo stm32f4xx_i2c_info = 
+{
+    .name           = TYPE_STM32F4XX_I2C,
+    .parent         = TYPE_SYS_BUS_DEVICE,
+    .instance_size  = sizeof(STM32F4XXI2CState),
+    .class_init     = stm32f4xx_i2c_class_init,
+};
+\end{lstlisting}
+
+Upon device registration, QEMU invokes the \textbf{\texttt{stm32f4xx\_i2c\_init()}} function, Code~\ref{code:stm32f4xx_i2c_class_init} . 
+This class initializer overrides the virtual methods of \texttt{SysBusDeviceClass} with 
+STM32F4xx I2C-specific implementations, configures device properties via \texttt{device} \texttt{\_class\_set\_props()}, assigns the realization callback \texttt{stm32f4xx\_i2c\_realize}, 
+and registers the VM state description. In this specific implementation, the \textbf{\texttt{stm32f4xx}} \textbf{\texttt{\_i2c\_init()}} function it also allocates the FSM structure.
+    
+\begin{lstlisting}[
+    language=C,
+    caption={\texttt{stm32f4xx\_i2c\_init()}},
+    label={code:stm32f4xx_i2c_class_init}]
+static void stm32f4xx_i2c_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+
+    device_class_set_props(dc, stm32f4xx_i2c_properties);
+    dc->realize = stm32f4xx_i2c_realize;
+    dc->vmsd    = &vmstate_stm32f4xx_i2c;
+}
+\end{lstlisting}
+

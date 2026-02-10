@@ -6,14 +6,14 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{amsmath}
-\usepackage{listings}  %use source code
-\usepackage{textcomp} % use arrows \textrightarrow
+\usepackage{listings}	% use source code
+\usepackage{textcomp} 	% use arrows \textrightarrow
 \usepackage{float}
 \usepackage{array,multirow}
 \usepackage{chapterbib}
 \usepackage{fancyhdr}
-\usepackage{tabularx} %tables easy
-\usepackage{eurosym} % €
+\usepackage{tabularx} 	% tables easy
+\usepackage{eurosym} 	% €
 \usepackage{indentfirst}
 \usepackage{textcomp}
 \usepackage{color}
@@ -35,6 +35,7 @@
 \usepackage{xcolor}
 \usepackage{forest}
 %\usetikzlibrary{arrows.meta, shadows.blur}
+\usepackage{dirtree}
 
 
 \lstdefinelanguage{VHDL}
@@ -49,16 +50,30 @@
 \lstdefinelanguage{C}
 {
   morekeywords={
-    reak, case, catch, const, continue, debugger, default,
-    else, for, function, if, return, switch, throw, typdef,
-	void, while
+    auto, break, case, char, const, continue, default, do, double, else, enum,
+    extern, float, for, goto, if, inline, int, long, register, restrict, return,
+    short, signed, sizeof, static, struct, switch, typedef, union, unsigned, void,
+    volatile, while, _Bool, _Complex, _Imaginary
   },
   sensitive=true,
-  morecomment=[l]{//},            % Comentarios de línea
-  morecomment=[s]{/*}{*/},        % Comentarios multilínea
-  morestring=[b]",                % Cadenas entre comillas dobles
-  morestring=[b]'                 % Cadenas entre comillas simples
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morecomment=[l]{\#},               % Preprocessor as comment
+  morestring=[b]",
+  morestring=[b]',
 }
+
+\lstset{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{purple}\itshape,  % Colors # directives
+  stringstyle=\color{red},
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{lightgray!10}
+}
+
 
 \lstdefinelanguage{JavaScript}
 {
@@ -191,21 +206,19 @@
 
 
 %--------Def
-\def \myTitle{Diseño y desarrollo de la unidad de control y comando de un sistema generador-detector de radiación ionizante}
-\def \myAuthor{Jorge Coca García}
+\def \myTitle{Design and development of a software emulation module of the I$^2$C hardware controller of the STM32F4 microcontroller family}
+\def \myAuthor{Antonio Lotti Villar}
 \def \myTutor{Pedro José Malagón Marzo}
 %\def \myPonente{Ponente}
 \def \myPlace{Madrid}
-\def \myMonth{septiembre}
-\def \myYear{2025}
-\def \myUniversity{Universidad Politécnica de Madrid}
-\def \myFaculty{Escuela Técnica Superior de Ingenieros de Telecomunicación}
-\def \myThesis{Trabajo fin de máster}
-\def \myMaster{Máster Universitario en Ingeniería de Sistemas Electrónicos}
-\def \myGradeTitle{Graduado en Ingeniería en Tecnologías de la Telecomunicación}
+\def \myMonth{February}
+\def \myYear{2026}
+\def \myUniversity{ Polytechnic University of Madrid }
+\def \myFaculty{ Higher Technical School of Telecommunications Engineers }
+\def \myThesis{ Master's Thesis }
+\def \myMaster{ Master's Degree in Electronic Systems Engineering }
 \def \myPonenteGradeTitle{Catedrático de Universidad}
-\def \myTutorGradeTitle{Dr. Ingeniero de Telecomunicación}
-\def \myDepartment{Departamento de Ingeniería Electrónica}
+\def \myDepartment{Department of Electronic Engineering}
 \def \myDedication{Dedicación.}
 \def \myQuote{''A quote'', Me.}
 
@@ -282,7 +295,7 @@
 	\vspace{1.5cm}
 	\begin{center}
 		\rm
-		{\sc\Large\expandafter{Autor:} \Large\uppercase\expandafter{\myAuthor}\\
+		{\sc\Large\expandafter{Author:} \Large\uppercase\expandafter{\myAuthor}\\
 			~\\		
 			\Large\expandafter{Supervisor:} \Large\uppercase\expandafter{\myTutor} \\
 			~\\
@@ -402,11 +415,20 @@
 %------------------
 
 
+% ======== Start Custom Commands ==================== %
+\renewcommand{\lstlistingname}{code}
+\renewcommand{\lstlistlistingname}{List of Code}
+% ======== End Custom Commands ====================== %
+
+
+% ============================================= %
+% ============== Start Document =============== %
+% ============================================= %
 \begin{document}
 
     \title{\myTitle}
     \author{\myAuthor}
-    \input{Chapters/0_Glossary.tex}
+%    \input{Chapters/0_Glossary.tex}
     \glsresetall
     
     \pagestyle{plain}
@@ -435,11 +457,15 @@
     
     \pagestyle{plain}
 
-    %\addcontentsline{toc}{chapter}{\contentsname}
+	% ======== Start Indexes ===================== %
+    %\addcontentsline{toc}{chapter}{\contentsname}		% command to add new custom indexes
+    \addcontentsline{toc}{chapter}{\lstlistlistingname}		% command to add new custom indexes
     \tableofcontents
     \listoffigures
     \listoftables
+	\lstlistoflistings
     \printglossaries
+	% ======== End Indexes ======================= %
     \vfill\newpage
     
     \newpage
@@ -460,19 +486,24 @@
     \setcounter{table}{0}
     \setcounter{page}{0}
     
+	% ======== Start Chapters ===================== %
 	\input{Chapters/Chapters.tex}
+    % ======== End Chapters ======================= %
     
-    % \addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
+	\vfill\newpage
 
 	% ======== Start Annexes ===================== %
-	\input{Annexes/ann_qom.tex}
+	\input{Annexes/annexes.tex}
     % ======== End Annexes ======================= %
 
     \addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
     %\backmatter
 
+	% ======== Start Bibliographies ===================== %
 	\bibliographystyle{IEEEtran}
-	\bibliography{Bibliographies/intro,Bibliographies/arm,Bibliographies/i2c,Bibliographies/qemu,Bibliographies/tools}
+	\bibliography{Bibliographies/intro,Bibliographies/arm,Bibliographies/I$^2$C,Bibliographies/qemu,Bibliographies/tools}
+	% ======== End Bibliographies ===================== %
+
 
     \cleardoublepage
 

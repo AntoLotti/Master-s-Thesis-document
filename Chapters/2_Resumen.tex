@@ -1,6 +1,48 @@
 \chapter*{Resumen}
 
+\section*{Resumen}
+
+Este proyecto se enmarca en el desarrollo de MICROLAB, un laboratorio virtual para 
+la docencia en sistemas empotrados que utiliza QEMU como plataforma de emulación para 
+reproducir placas basadas en microcontroladores STM32F4 empleados en la UPM. El 
+objetivo principal ha sido incorporar el bus I$^2$C en el microcontrolador STM32F405 
+y emular uno de los sensores utilizados en las prácticas de laboratorio, el 
+acelerómetro triaxial LIS3DH, de forma que el firmware desarrollado con STM32CubeIDE 
+pueda ejecutarse sin modificaciones sobre una plataforma completamente virtual. Para 
+ello se han analizado en detalle las arquitecturas del STM32F405 y del LIS3DH, sus 
+mapas de registros y la interacción a nivel de protocolo I$^2$C, definiendo un diseño 
+que prioriza la fidelidad a nivel de registro y la compatibilidad con la librería HAL 
+de ST.
+
+En el lado del microcontrolador, se ha implementado en QEMU un modelo completo del 
+controlador I$^2$C del STM32F405, basado en una máquina 
+de estados finitos que reproduce las secuencias de START, dirección, lectura/escritura 
+y STOP, así como la generación de interrupciones de evento y error y la 
+gestión de los registros CR1, CR2, SR1, SR2 y DR. En el lado del sensor, se ha 
+desarrollado un modelo detallado del LIS3DH como dispositivo esclavo I$^2$C 
+, que implementa su mapa de 64 registros, los tres modos de 
+operación (normal, alta resolución y bajo consumo), los rangos de medida 
+configurables ($\pm$2~g, $\pm$4~g, $\pm$8~g, $\pm$16~g) y la generación de la 
+interrupción de datos disponibles (DRDY) en la línea INT1. El modelo expone además 
+propiedades QOM (\texttt{accel-x/y/z}, \texttt{temp}) que permiten inyectar de forma 
+controlada datos de aceleración y temperatura durante las pruebas, facilitando la 
+verificación sistemática del comportamiento del dispositivo emulado.
+
+Ambos modelos se han integrado en una máquina QEMU basada en la placa Netduino Plus 2, 
+que incorpora el SoC STM32F405, el mapeo de direcciones de los periféricos y el 
+encaminamiento correcto de las líneas de interrupción NVIC y EXTI, conectando el 
+LIS3DH como esclavo en el bus I$^2$C1 con dirección \texttt{0x18}. Sobre esta 
+plataforma se han ejecutado firmwares reales desarrollados con STM32CubeIDE y la 
+librería HAL, verificando la inicialización del bus I$^2$C, la configuración de 
+registros del acelerómetro, las lecturas multi-byte con auto-incremento y la 
+recepción de interrupciones de datos listos, lo que demuestra la compatibilidad 
+funcional con el hardware real en los escenarios típicos de las prácticas docentes. 
+En conjunto, el trabajo proporciona a MICROLAB una emulación completa del subsistema 
+I$^2$C STM32F405--LIS3DH, habilitando nuevas prácticas virtuales de sensorización y 
+comunicación sin necesidad de hardware físico y sentando una base reutilizable para la 
+futura incorporación de otros microcontroladores y periféricos de la familia STM32F4.
+
 
 \section*{Palabras clave}
-
+QEMU, HAL STM32, ARM, LIS3DH, emulacion, virtualizacion
 

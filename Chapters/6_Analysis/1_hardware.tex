@@ -15,10 +15,10 @@ of these microcontrollers are directly implemented in the SIVALSE QEMU version.
 However, the STM32F405 microcontroller is. While this is not surprising, given that 
 they share the same manufacturer and the same Arm Cortex-M4 architecture, an 
 analysis of the reference manuals for all four microcontrollers, specifically regarding 
-the I2C protocol, reveals that they share a basic I2C controller architecture. 
+the I$^2$C protocol, reveals that they share a basic I$^2$C controller architecture. 
 During the analysis, no register-level differences were observed between them, but 
-even if variations existed that went undetected, a QEMU implementation of the I2C 
-protocol for the STM32F405 could serve as a fundamental basis for future I2C 
+even if variations existed that went undetected, a QEMU implementation of the I$^2$C 
+protocol for the STM32F405 could serve as a fundamental basis for future I$^2$C 
 implementations of these microcontrollers, requiring only model-specific adjustments.
 
 %==== stm32f405 ====%

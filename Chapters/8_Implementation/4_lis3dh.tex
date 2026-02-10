@@ -1,0 +1,109 @@
+\section{LIS3DH Accelerometer Implementation}
+\label{sec:impl_lis3dh}
+
+The LIS3DH accelerometer emulation provides a complete I2C slave device implementation 
+that faithfully reproduces the STMicroelectronics LIS3DH register map 
+and configuration logic. The LIS3DH accelerometer device model follows the same fundamental
+which were explained for I2C controller. However, as an I2C slave device rather than a bus controller, the LIS3DH exhibits key architectural
+differences in its communication interface, device properties, and virtual machine state
+management. This section describes the implementation of the LIS3DH device model,
+focusing specifically on these critical distinctions.
+
+\subsection{Architectural Distinction: I2C Slave vs. SysBus Device}
+\label{subsec:slave_vs_sysbus}
+
+The fundamental difference between the STM32F4xx I2C controller and the LIS3DH 
+accelerometer lies in their position within the system hierarchy:
+
+\begin{itemize}
+    \item \textbf{STM32F4xx I2C Controller}: Inherits from \texttt{TYPE\_SYS\_BUS\_DEVICE}, 
+    providing memory-mapped I/O regions that respond to CPU memory accesses at specific 
+    addresses. The controller acts as the \textbf{I2C bus master}, initiating transactions and managing the bus protocol.
+    
+    \item \textbf{LIS3DH Accelerometer}: Inherits from \texttt{TYPE\_I2C\_SLAVE}, 
+    implementing an I2C peripheral that responds to transactions initiated by the bus 
+    master. The LIS3DH has no MMIO interface accessible to the CPU; instead, it 
+    communicates exclusively through the I2C protocol using seven-bit addressing.
+\end{itemize}
+
+This difference means that different communication handlers are needed. While 
+the I2C controller employs MMIO read/write functions (\texttt{stm32f4xx\_i2c\_read()} 
+and \texttt{stm32f4xx\_i2c\_write()}), the LIS3DH implements \textbf{I2C protocol callbacks} (\texttt{lis3dh\_i2c\_event()}, \texttt{lis3dh\_i2c\_send()}, and
+\texttt{lis3dh\_i2c\_recv()}).
+
+
+\subsection{Device Structure and Configuration State}
+
+The LIS3DH device state structure (\texttt{LIS3DHState}), 
+(Code~\ref{code:LIS3DHState}), is defined in the code file \texttt{lis3dh.h}. 
+Similar to the \texttt{STM32F4XXI2CState} structure, the \texttt{LIS3DHState} 
+structure uses variables of type \texttt{uint8\_t} to represent the actual 
+hardware registers.
+
+The \texttt{LIS3DHState} structure also implements two additional structures:
+
+\begin{itemize}
+    \item \textbf{The \texttt{lis3dh\_config\_t}} structure, which caches the values of the decoded 
+    registers (operating mode, full range, output data rate) to avoid repeated 
+    extraction of bit fields. 
+    
+    \item \textbf{The \texttt{lis3dh\_params\_t}} structure contains the calculated values 
+    (sensitivity coefficients, bit shift values) derived from the values in the 
+    \texttt{lis3dh\_config\_t} structure, thus optimizing data conversion.
+\end{itemize}
+
+As mentioned in Chapter~\ref{chap:analysis_lis3dh}, the LIS3DH accelerometer has 
+two programmable interrupt output pins: INT1 and INT2. Both pins have their 
+respective configuration registers. To use these interrupt lines with other 
+emulated devices, these two pins are represented in the \texttt{LIS3DHState} 
+structure as \texttt{qemu\_irq} signals and, during the execution of the 
+\texttt{lis3dh\_realize()} function, are initialized as GPIO elements.
+
+
+\subsection{I2C Slave Interface Implementation}
+
+As an I2C slave device, the LIS3DH implements the \texttt{I2CSlaveClass} virtual 
+methods: \texttt{event()}, \texttt{recv()}, and \texttt{send()}. The event() method is the event handler, 
+it is responsible for responding to events coming from the I2C bus (START, STOP, 
+END). In the current implementation of the LIS3DH accelerometer it has been 
+defined with the function lis3dh\_i2c\_event(), Code~\ref{code:lis3dh_i2c_event}.
+
+
+The lis3dh\_i2c\_recv() function is called every time the I2C master reads a byte from the slave. The function retrieves the value of the register at the address of the current pointer via lis3dh\_read\_register() and returns it to the master. If auto-increment was previously enabled during subaddressing, the record pointer is subsequently incremented, allowing burst reads of consecutive records. This design ensures that the firmware can read all six bytes of throttle output (OUT\_X\_L/H, OUT\_Y\_L/H, OUT\_Z\_L/H) in a single I2C read transaction.
+
+
+The lis3dh\_i2c\_send() function handles all bytes transmitted by the I2C master to the LIS3DH. It implements a two-phase protocol: upon receiving the first byte after the I2C START condition, the function extracts the register address from bits [6:0] and the automatic increment control bit, putting the device into data writing mode. Subsequent transmitted bytes are written to the current register address via lis3dh\_write\_register(), and if auto-increment is enabled, the register pointer automatically advances to the next address. This mechanism allows the firmware to set multiple consecutive control registers in a single I2C transaction without reissuing the subaddress byte, which matches the behavior of LIS3DH physical hardware.
+
+
+\subsection{Register Map and Configuration Logic}
+
+The LIS3DH accelerometer register map implementation comprises 64 registers, including 
+those for identification, control, status, and output data. As explained in 
+Section~\ref{chap:design_lis3dh}, the accelerometer model was designed with the idea 
+that whenever the firmware modifies a control register, the emulator immediately 
+recalculates all derived operating parameters. This ensures that the device state remains 
+consistent and that subsequent firmware operations use correct parameter values, 
+mirroring the atomic configuration behavior of the physical hardware. For example, when 
+the firmware writes to \texttt{CTRL\_REG1} to change the output data rate or to 
+\texttt{CTRL\_REG4} to modify the full-scale range, an associated function is 
+immediately invoked that updates the corresponding parameters; in this case, the 
+sensitivity coefficients are recalculated and the bit offsets are updated.
+
+
+\subsection{QOM Property Integration}
+
+The \texttt{lis3dh\_initfn()} function is the QOM instance initializer, invoked 
+during device object creation. It registers four dynamic properties (\texttt{accel-x}, 
+\texttt{accel-y}, \texttt{accel-z}, and \texttt{temp}) that expose the sensor 
+measurement state to the host emulation environment. Each property is bound to a pair 
+of getter/setter callbacks: writing to \texttt{accel-x} invokes 
+\texttt{lis3dh\_set\_accel\_x()}, which converts the input acceleration value (in 
+milligravity) to the sensor's raw format, updates internal output registers, and 
+triggers data-ready interrupts, exactly as specified in the Section~\ref{chap:design_lis3dh}; 
+reading from \texttt{accel-x} invokes \texttt{lis3dh\_get\_accel\_x()}, which retrieves 
+and scales the stored acceleration data. This implementation ensures bit-accurate output 
+register values matching the datasheet specifications, enabling firmware using the STM 
+HAL library to read acceleration data without modification.
+
+
+

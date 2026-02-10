@@ -1,0 +1,195 @@
+\subsection{old}
+
+
+
+
+\begin{lstlisting}[language=C, caption={Netduino Plus 2 machine initialization}]
+static void netduinoplus2_init(MachineState *machine)
+{
+    DeviceState *dev;
+    Clock *sysclk;
+
+    /* This clock doesn't need migration because it is fixed-frequency */
+    sysclk = clock_new(OBJECT(machine), "SYSCLK");
+    clock_set_hz(sysclk, SYSCLK_FRQ);
+
+    /* Instantiate STM32F405 SoC */
+    dev = qdev_new(TYPE_STM32F405_SOC);
+    object_property_add_child(OBJECT(machine), "soc", OBJECT(dev));
+    qdev_connect_clock_in(dev, "sysclk", sysclk);
+    sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &error_fatal);
+
+    /* Initialize LIS3DH on I2C1 */
+    STM32F405State *s = STM32F405_SOC(dev);    
+    DeviceState *lis3dh = qdev_new(TYPE_LIS3DH); // Creating LIS3DH accelerometer
+    
+    i2c_slave_set_address(I2C_SLAVE(lis3dh), 0x18); // Setting I2C address to 0x18    
+    i2c_slave_realize_and_unref(I2C_SLAVE(lis3dh), 
+                    s->i2c[0].bus, &error_fatal);    // Connecting to I2C1 bus
+
+    qdev_connect_gpio_out(lis3dh, 0, qdev_get_gpio_in(DEVICE(&s->exti), 1));
+
+    /* Load firmware into flash memory */
+    armv7m_load_kernel(ARM_CPU(first_cpu),
+                       machine->kernel_filename,
+                       0, FLASH_SIZE);
+}
+\end{lstlisting}
+
+
+%%%%%
+
+
+When the LIS3DH asserts its INT1 output in response to a data-ready event, the signal propagates through the device hierarchy as follows:
+
+\begin{enumerate}
+\item \textbf{LIS3DH Assertion}: The `lis3dh\_update\_drdy\_interrupt()` function calls `qemu\_irq\_raise(s->int1)` when new acceleration data becomes available and the I1\_ZYXDA bit in CTRL\_REG3 is set.
+
+\item \textbf{EXTI Reception}: The QEMU IRQ infrastructure routes the signal to the EXTI device's `gpio\_in[1]` input. The EXTI device updates its pending register (EXTI\_PR) and, if the corresponding interrupt mask bit (EXTI\_IMR) is enabled, propagates the interrupt to its output.
+
+\item \textbf{NVIC Activation}: The EXTI output triggers NVIC IRQ 7 (EXTI1\_IRQn). The NVIC evaluates interrupt priority, preemption settings, and masking, then signals the ARM Cortex-M4 core to execute the exception handler.
+
+\item \textbf{Firmware ISR Execution}: The Cortex-M4 core vectors to the EXTI1\_IRQHandler, which executes firmware-defined interrupt service logic. Typically, the ISR reads the LIS3DH's INT1\_SRC register to identify the interrupt source and clears the EXTI pending bit by writing to EXTI\_PR.
+
+\item \textbf{Interrupt Clearance}: If the LIS3DH is configured in latched interrupt mode (LIR\_INT1 = 1 in CTRL\_REG5), the interrupt remains asserted until firmware reads INT1\_SRC. Reading this register executes:
+
+
+This lowers the INT1 line, clearing the EXTI pending bit and completing the interrupt cycle.
+\end{enumerate}
+
+
+
+%%%%%%%%%%%%%%%%%%%%5
+
+
+This code demonstrates several key integration patterns:
+
+\begin{itemize}
+\item \textbf{Hierarchical Device Instantiation:} The SoC is created first and realized, which triggers realization of all child I2C controllers and creation of I2C buses.
+
+\item \textbf{Bus Reference Usage:} The \texttt{s->i2c[0].bus} pointer (populated during SoC realization) is used to attach the LIS3DH to I2C1.
+
+\item \textbf{GPIO Routing:} The LIS3DH's INT1 output (GPIO index 0) is connected to EXTI line 1, enabling interrupt-driven firmware operation.
+
+\item \textbf{I2C Address Configuration:} The accelerometer's 7-bit I2C address (\texttt{0x18}) is set before realization, matching the hardware configuration with SA0 pin grounded.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{QEMU Device Hierarchy}
+
+The Netduino Plus 2 machine instantiates a hierarchical device tree where the LIS3DH exists as an I2C slave device attached to the STM32F405 SoC's I2C1 bus. Figure~\ref{fig:qemu_hierarchy} illustrates the complete device hierarchy:
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+    netduinoplus2 (Machine)
+    \---- STM32F405_SOC
+        |---- i2c[0] (I2C1 Bus)
+        |   \---- lis3dh (I2C Slave @ 0x18)
+        |       |---- int1 (qemu_irq out)  ----\
+        |       \---- int2 (qemu_irq out)      |
+        |                                      |
+        \---- exti (STM32F4XX_EXTI)            |
+            |---- gpio_in[0] ← (EXTI0)         |
+            |---- gpio_in[1] ← (EXTI1) <-------/
+            |---- gpio_in[2] ← (EXTI2)
+            \---- ...
+            \---- irq_out[7] → NVIC IRQ 7 (EXTI1_IRQn)
+    \end{verbatim}
+    \caption{qemu hierarchy}
+    \label{fig:qemu_hierarchy}
+\end{figure}
+
+This hierarchy demonstrates the signal flow from the LIS3DH interrupt outputs through the EXTI (External Interrupt) controller to the NVIC (Nested Vectored Interrupt Controller), which ultimately triggers the ARM Cortex-M4 core's interrupt service routine.
+
+
+
+
+
+This hierarchy reflects the physical hardware organization and enables QOM-based introspection and property manipulation via the QEMU monitor.
+
+
+%==== Code Quality and Testing Infrastructure ====%
+\section{Code Quality and Testing Infrastructure}
+
+\label{sec:impl_quality}
+
+Throughout the implementation process, adherence to QEMU coding standards and validation through systematic testing were prioritized to ensure reliability and maintainability.
+
+\subsection{Coding Standards Compliance}
+
+All implemented code follows QEMU's coding style guidelines:
+
+\begin{itemize}
+\item \textbf{Formatting:} 4-space indentation, 80-character line limit, K\&R brace style.
+\item \textbf{Naming Conventions:} Lowercase with underscores for functions and variables, capitalized for type names, prefixes indicating subsystem (\texttt{stm32f4xx\_}, \texttt{lis3dh\_}).
+\item \textbf{Documentation:} Doxygen-style comments for all public functions and complex algorithms.
+\item \textbf{Error Handling:} Consistent use of \texttt{Error **errp} parameters for error propagation.
+\end{itemize}
+
+Code quality was verified using QEMU's \texttt{scripts/checkpatch.pl} tool:
+
+\begin{verbatim}
+$ ./scripts/checkpatch.pl --no-tree -f hw/i2c/stm32f4xx_i2c.c
+total: 0 errors, 0 warnings, 1247 lines checked
+\end{verbatim}
+
+\subsection{Testing Approach}
+
+Validation of the implementation employed a multi-layered testing strategy:
+
+\begin{enumerate}
+\item \textbf{Unit Testing:} Individual register operations were tested using QEMU's \texttt{qtest} framework, verifying correct read/write behavior and flag updates.
+
+\item \textbf{Firmware Integration:} Custom firmware based on STM32 HAL libraries exercised complete I2C transaction sequences (initialization, write, read, multi-byte transfers).
+
+\item \textbf{Interrupt Verification:} Interrupt generation timing and flag clearing sequences were validated by monitoring NVIC interrupt pending registers during firmware execution.
+
+\item \textbf{Protocol Compliance:} I2C bus signals were logged using QEMU's trace infrastructure and compared against expected I2C protocol timings from the datasheet.
+\end{enumerate}
+
+The firmware testing harness included:
+\begin{itemize}
+\item LIS3DH initialization sequence (configure ODR, FS, operating mode)
+\item Single-byte and multi-byte register read/write operations
+\item Auto-increment addressing mode validation
+\item Acceleration data reading and conversion verification
+\item Interrupt-driven data-ready operation
+\end{itemize}
+
+All test scenarios executed successfully, confirming functional correctness of the implemented device models.
+
+
+%==== Build Artifacts and Deliverables ====%
+\section{Build Artifacts and Deliverables}
+
+\label{sec:impl_artifacts}
+
+The implementation deliverables include:
+
+\begin{itemize}
+\item \textbf{Source Files:} 9 C source files and 9 header files totaling approximately 3,500 lines of code.
+\item \textbf{Documentation:} Inline code comments, function documentation, and this implementation chapter.
+\item \textbf{Build Configuration:} Modified \texttt{meson.build} files for compilation integration.
+\item \textbf{Test Firmware:} STM32 HAL-based validation programs demonstrating I2C and accelerometer operation.
+\end{itemize}
+
+The complete implementation is compatible with QEMU version 9.0.0 and can be built and executed using the standard QEMU build process documented in Section~\ref{sec:impl_environment}.
+
+
+%==== Summary ====%
+\section{Summary}
+
+This chapter presented the complete implementation of the STM32F405 I2C emulation and LIS3DH accelerometer device models within the QEMU framework. The implementation faithfully translates the design decisions documented in Chapter~\ref{chap:design} into working C code that adheres to QEMU's architectural patterns and coding standards.
+
+Key implementation achievements include:
+
+\begin{itemize}
+\item Extension of the STM32F405 SoC model to instantiate three I2C controllers with correct memory mapping and interrupt routing.
+\item Development of a complete I2C controller emulation featuring a finite state machine that translates firmware register operations into I2C bus events.
+\item Creation of a LIS3DH accelerometer model implementing the full register map, I2C slave protocol, configuration logic, and acceleration data conversion pipeline.
+\item Integration of all components within the Netduino Plus 2 machine definition, enabling end-to-end firmware testing.
+\end{itemize}
+
+The implementation has been validated through comprehensive firmware testing, demonstrating functional correctness and protocol compliance. This work establishes a foundation for future extensions, including additional I2C peripherals and enhanced testing frameworks, which will be discussed in the conclusion and future work chapter.

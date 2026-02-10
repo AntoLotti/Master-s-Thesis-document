@@ -1,0 +1,79 @@
+\section{Design Considerations}
+\label{chap:design_decisions}
+
+\textbullet\ \textbf{ I$^2$C Master-Only Mode:}
+
+One of the initial design decisions was to focus the development of the 
+\\STM32F405's  I$^2$C interface exclusively on master mode. This is because, in the 
+educational context in which it will be used, there is no need to use a microcontroller 
+as an  I$^2$C slave. Furthermore, the LIS3DH sensor does not have a master mode, so 
+this decision defines the operational context in which the STM32F405 communicates 
+with the LIS3DH accelerometer. This decision simplifies the scope of the emulation 
+while maintaining full functional reliability for the intended use case.
+
+\textbullet\ \textbf{Timing Register Abstraction:}
+
+QEMU implements the  I$^2$C protocol through functions that abstract the different 
+events of the  I$^2$C protocol (Code~\ref{code:qemu_i2c_fun}), without requiring cycle-level clock generation. This 
+abstraction significantly reduces implementation complexity and preserves functional correctness for firmware testing. 
+To emulate the STM32F405 I2C protocol, this means that it is not necessary 
+to implement the timing logic controlled by the I2C\_CCR and I2C\_TRISE registers.
+
+\lstinputlisting[
+  language=C,
+  caption={\texttt{qemu i2c functions}},
+  label={code:qemu_i2c_fun}
+]{Resources/Code/i2c_functions.c}
+
+
+\textbullet\ \textbf{Netduino Plus 2 as a Development Board for the STM32F405 Microcontroller:}
+
+Unlike other emulators, QEMU fully emulates a hardware platform; it doesn't 
+offer the option to emulate only MCU models independently. This limitation 
+created the need to find or implement a development board model in QEMU that 
+used the STM32F405 microcontroller. Fortunately, QEMU has a pre-implemented 
+minimalist model of the Netduino Plus 2 electronic development board, based on 
+the STM32F405RG microcontroller, which has saved users from having to develop 
+a new board to implement the microcontroller.
+
+\textbullet\ \textbf{DRDY-Only Interrupt Implementation:}
+
+As explained during the analysis of LIS3DH in section~\ref{chap:analysis_lis3dh}, this accelerometer 
+has several interrupts. Of all the interrupts it offers, only the data-ready (DRDY) 
+interrupt logic could be implemented. While the goal was to implement the logic 
+for all interrupts, the development began with the DRDY interrupt logic due to its 
+simplicity and because it represents the most common interrupt mode in embedded 
+applications. Unfortunately, due to time constraints, the logic for the remaining 
+interrupts could not be implemented. These omissions do not affect the basic 
+functionality required for typical STM32 firmware development scenarios, where DRDY 
+polling or simple data ready interrupts are sufficient.
+
+\textbullet\ \textbf{QOM as interface:}
+
+Conceived as a temporary solution until its full implementation in MICROLAB, 
+the LIS3DH accelerometer model has been designed to allow runtime access to 
+acceleration values for each axis. This has been achieved by defining QOM properties 
+in the model. As explained during the QEMU analysis, the QOM API allows the 
+creation of dynamic properties that can be modified at runtime. Thanks to these 
+properties, the developer can inject known acceleration values using commands, such 
+as those described in the Figure~\ref{fig:qom_exampe}, to test the accelerometer's functionality with known 
+values.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+        (qemu) qom-set /machine/soc/i2c[0]/i2c1/child[0] accel-x 500 
+        (qemu) qom-set /machine/soc/i2c[0]/i2c1/child[0] accel-y -300 
+        (qemu) qom-set /machine/soc/i2c[0]/i2c1/child[0] accel-z 980
+        
+        (qemu) qom-get /machine/soc/i2c[0]/i2c1/child[0] accel-x 
+        500
+        (qemu) qom-get /machine/soc/i2c[0]/i2c1/child[0] accel-y 
+        -300
+        (qemu) qom-get /machine/soc/i2c[0]/i2c1/child[0] accel-z
+        980  
+    \end{verbatim}
+    \caption{access to qom properties}
+    \label{fig:qom_exampe}
+\end{figure}
+

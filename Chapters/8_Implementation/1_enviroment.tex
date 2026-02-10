@@ -1,0 +1,139 @@
+\section{Development Environment}
+\label{sec:impl_environment}
+
+Before starting with the implementation and development of the different devices, it is important to discuss the initial step, which is the installation of QEMU and its initial configuration.
+
+\subsection{QEMU Version \& installation}
+
+The core of this thesis project lies in the open-source tool QEMU. This thesis uses a customized version of QEMU developed by the SIVALSE project, based on the official QEMU version 9.1.50, capable of emulating the STM32F4 architecture (at the time of writing, the official QEMU version is 10.2.50). This customized version of QEMU is the same one used by MICROLAB to create virtual labs. The work carried out in this thesis extends the basic structure of the STM32F405 SoC in this customized version of QEMU by integrating the I2C controller.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+        $ mkdir qemu-new
+        $ git clone https://github.com/DIE-SILVASE/qemu_new.git qemu-new
+    \end{verbatim}
+
+    \caption{qemu installation}
+    \label{fig:qemu_installation}
+\end{figure}
+
+
+\subsection{Build System Configuration}
+
+QEMU utilizes the Meson build system in conjunction with Ninja for compilation. To integrate the new device models, modifications were required to multiple \texttt{meson.build} files across the QEMU source tree, 
+Figure~\ref{fig:qemu_project_arch}:
+
+\begin{itemize}
+    \item \textbf{hw/arm/meson.build}:      Added \texttt{stm32f405\_soc.c} to the ARM-specific hardware compilation targets.
+    \item \textbf{hw/i2c/meson.build}:      Added \texttt{stm32f4xx\_i2c.c} to the I2C subsystem compilation targets.
+    \item \textbf{hw/sensor/meson.build}:   Created new sensor subsystem directory and \\ added \texttt{lis3dh.c} to compilation targets.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{minipage}{0.9\textwidth}
+        \dirtree{%
+        .1 qemu/.
+        .2 hw/.
+        .3 arm/.
+        .4 stm32f405\_soc.c     (SoC container).
+        .4 stm32f405\_soc.h.
+        .4 netduinoplus2.c     (Machine definition).
+        .4 meson.build.
+        .3 i2c/.
+        .4 stm32f4xx\_i2c.c     (I2C controller).
+        .4 stm32f4xx\_i2c.h.
+        .4 stm32f4xx\_types\_i2c.h.
+        .4 meson.build.
+        .3 sensor/.
+        .4 lis3dh.c            (Accelerometer).
+        .4 lis3dh.h.
+        .4 lis3dh\_types.h.
+        .4 meson.build.
+        }
+    \end{minipage}
+
+    \caption{qemu project architecture}
+    \label{fig:qemu_project_arch}
+\end{figure}
+
+
+This organization ensures that each device type is located in its logically appropriate subsystem, facilitating code discovery and maintenance.
+
+\subsection{Compilation and Testing Workflow}
+
+This thesis emulates a Netduino Plus 2 development board to test the new features of the STM32F405RG microcontroller. This board uses a 32-bit ARM architecture, so before compiling, QEMU is configured with the \texttt{arm-softmmu} flag, which ensures that only 32-bit ARM architectures are compiled and unnecessary ones are omitted.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+        $ mkdir -p bin/debug/native
+
+        $ cd bin/debug/native
+        
+        $ ../../../configure --target-list=arm-softmmu \\
+             --enable-debug  \\
+             --disable-strip \\ 
+             --extra-cflags='-g'
+
+        $ make -j$(nproc)
+        
+        $ cd ../../..
+    \end{verbatim}
+    \caption{qemu build}
+    \label{fig:qemu_build}
+\end{figure}
+
+The flags \texttt{--enable-debug} and \texttt{--disable-strip} are used to enable GDB-based debugging of the STM32F405 SoC emulation. This allowed inspection of the device state (interrupt registers, I2C transaction registers) and hardware-firmware interaction at runtime.
+
+
+Once installed and configured for the requirements of this project, QEMU offers a 
+wide range of options for hardware emulation. For example, the command shown in 
+Figure~\ref{fig:qemu_debug_cmd} includes several debug flags that have been essential 
+throughout development, enabling debugging of both QEMU and the firmware.\\
+
+\begin{figure}[H]
+    \centering
+    \begin{lstlisting}[language=bash]
+        sudo ./qemu-system-arm \
+        -M netduinoplus2 \
+        -kernel firmware_test_1.elf \
+        -d trace:i2c_event \
+        -D debug.log \
+        -serial stdio \
+        -s -S
+    \end{lstlisting}
+    \caption{QEMU command for debugging}
+    \label{fig:qemu_debug_cmd}
+\end{figure}
+
+
+The \texttt{-s} and \texttt{-S} flags are typically used together during debugging:
+
+\begin{itemize}
+  \item \texttt{-s}: Starts a \textbf{GDB server} in QEMU on TCP port~1234. This 
+  option allows the use of the \texttt{arm-none-eabi-gdb} tool to debug the firmware 
+  as follows:
+\end{itemize}
+
+\begin{lstlisting}[language=bash, caption={Connecting GDB to the QEMU GDB server}, label={code:gdb_connect}]
+arm-none-eabi-gdb firmware_test_1.elf
+(gdb) target remote :1234
+\end{lstlisting}
+
+\begin{itemize}
+  \item \texttt{-S}: Prevents the CPU from starting automatically. QEMU loads the 
+  firmware and then halts at reset. Execution only begins when GDB is instructed to 
+  \texttt{continue} or \texttt{step}. This behavior is particularly useful for 
+  inspecting registers, setting breakpoints at \texttt{main()}, and examining the 
+  initial system state before any code runs.
+\end{itemize}
+
+The \texttt{-serial stdio} option redirects the emulated UART (typically USART1 or 
+USART2, depending on the machine) to the host standard input and output. In practice, 
+all \texttt{printf()} calls from the STM32 firmware routed through UART appear in the 
+terminal where the QEMU command is executed.
+
+

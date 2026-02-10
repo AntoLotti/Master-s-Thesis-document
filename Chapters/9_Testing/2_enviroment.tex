@@ -1,0 +1,49 @@
+\section{STM32CubeIDE Configuration}
+\label{chap:test_enviroment}
+
+As mentioned in the section~\ref{chap:Back_ARM_STM32CubeIDE}, all firmware development for 
+this project was performed using \texttt{STM32CubeIDE} and its associated tools. This 
+section describes the pre-configuration carried out in \texttt{STM32CubeIDE} prior to 
+defining the functional tests.
+
+\texttt{STM32CubeIDE} allows the creation of projects specifically targeted to 
+particular microcontrollers or development boards. Using this feature, a new project 
+is created using a preconfigured STM32F4-based evaluation board as the base. This board 
+uses the STM32F407 microcontroller, which, as previously noted, is compatible with 
+STM32F405 configurations.
+
+Once the project is created, \texttt{STM32CubeMX} opens automatically, allowing the 
+microcontroller to be configured visually as follows:
+
+\begin{enumerate}
+  \item Enable I$^2$C1 and configure it for 100~kHz operation with 7-bit addressing. 
+  Then assign the I2C1\_SCL and I2C1\_SDA lines to pins PB6 and PB7, respectively.
+  
+  \item Configure a UART peripheral to enable debugging.
+  
+  \item Reconfigure pin PA1, which is wired to the LIS3DH INT1 pin, to 
+  \textbf{GPIO\_EXTI1} mode. In the configuration for this pin, select 
+  ``External interrupt mode with rising edge trigger detection'' and ``No pull-up and 
+  no pull-down''. Then, in the \textbf{NVIC} tab, enable the \textbf{EXTI line 1 
+  interrupt} and assign it a priority of 5.
+\end{enumerate}
+
+Once these configurations are applied and saved, \texttt{CubeMX} generates the code 
+required to initialize the I$^2$C, GPIO, and EXTI lines. Within this generated code, and 
+before integrating the LIS3DH library or defining the tests, the following two 
+modifications must be made:
+
+\begin{enumerate}
+  \setcounter{enumi}{3}
+  \item In the \texttt{main()} function, locate and comment out the 
+  \texttt{SystemClock\_Config()} call.
+  
+  \item Define the \texttt{HAL\_GPIO\_EXTI\_Callback()} function, which is executed 
+  automatically when the DRDY interrupt is triggered on INT1.
+\end{enumerate}
+
+The \texttt{SystemClock\_Config()} function is commented out because the STM32F405 
+model implemented in QEMU does not accurately emulate the entire clock subsystem. As 
+a result, some function calls within \texttt{SystemClock\_Config()} return 
+\texttt{HAL\_ERROR}, which in turn causes \texttt{Error\_Handler()} to be invoked and 
+enter its infinite loop.

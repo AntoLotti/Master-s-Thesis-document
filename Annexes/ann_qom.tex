@@ -11,7 +11,7 @@ shared by all instances of that type. It holds\cite{Qemu_QOM_API}:
   language=C,
   caption={\texttt{ObjectClass}},
   label={code:ObjectClass}
-]{Code/qom/ObjectClass.c}
+]{Resources/Code/qom/ObjectClass.c}
 
 \begin{itemize}
     \item \textbf{Type information}: Unique identifier for runtime type checking
@@ -29,7 +29,7 @@ introspected, and destroyed. Each \texttt{Object} instance encapsulates:
   language=C,
   caption={\texttt{Object}},
   label={code:Object}
-]{Code/qom/Object.c}
+]{Resources/Code/qom/Object.c}
 
 \begin{itemize}
     \item \textbf{Type identification} via a class pointer
@@ -47,7 +47,7 @@ and manage instances of the QOM type.
   language=C,
   caption={\texttt{TypeInfo}},
   label={code:TypeInfo}
-]{Code/qom/TypeInfo.c}
+]{Resources/Code/qom/TypeInfo.c}
 
 \begin{itemize}
     \item Type name and parent class (e.g., parent=\texttt{"sysbus-device"})
@@ -74,4 +74,4 @@ configuration without recompilation.
   language=C,
   caption={\texttt{MemoryRegion}},
   label={code:MemoryRegion}
-]{Code/memory/memoryregion.c}
+]{Resources/Code/memory/memoryregion.c}

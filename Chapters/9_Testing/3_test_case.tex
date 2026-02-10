@@ -1,0 +1,175 @@
+\section{Test Cases}
+\label{chap:test_test_case}
+
+This section presents a series of tests and their results which, in the developer's opinion, cover all aspects necessary to validate the operation of the project, both of the I2C controller and the LIS3DH.
+
+\subsection{Test Cases}
+
+\subsubsection{Test Case 1: Device Initialization and WHO\_AM\_I Verification}
+
+\textbf{Objectives:} Verify that the LIS3DH device responds to I$^2$C transactions and 
+returns the correct device ID.
+
+\textbf{Procedure:}
+\begin{enumerate}
+  \item Initialize LIS3DH in Normal mode, $\pm$4g, 100~Hz.
+  \item Read WHO\_AM\_I register (0x0F).
+  \item \textbf{Expected:} \texttt{0x33} (LIS3DH device ID, datasheet §8.1).
+\end{enumerate}
+
+\textbf{Code:}
+\begin{lstlisting}[language=C, caption={WHO\_AM\_I verification test case}, 
+label={code:testcase1}]
+static void testcase1() {
+    printf("--- Test Case 1: WHO_AM_I Verification ---\n");
+    lis3dh_config.fscale = LIS3DH_FS_4G; 
+    lis3dh_config.mode = LIS3DH_MODE_NORMAL;
+    // ... init ...
+    HAL_StatusTypeDef status = lis3dh_init(&lis3dh_acc, &hi2c1, 
+                                          LIS3DH_I2C_DEFAULT_ADDRESS, &lis3dh_config);
+    if (status == HAL_OK) 
+        printf("PASS: LIS3DH init OK, WHO_AM_I = 0x33\n");
+    else 
+        printf("FAIL: LIS3DH init failed\n");
+}
+\end{lstlisting}
+
+
+%%%%%
+
+\subsubsection{Test Case 2: Operating Mode Configuration}
+\textbf{Objective:} Validate that CTRL\_REG1/CTRL\_REG4 correctly configure all 
+operating modes.
+
+\textbf{Procedure:} For each mode (Normal/High-Res/Low-Power): configure → read → verify.
+
+\textbf{Code:}
+\begin{lstlisting}[language=C, caption={Operating mode configuration test}, 
+label={code:testcase2}]
+static bool testcase21() {  // Normal mode
+    lis3dh_set_mode(&lis3dh_acc, LIS3DH_MODE_NORMAL);
+    lis3dh_mode_t mode = lis3dh_get_mode(&lis3dh_acc);
+    return (mode == LIS3DH_MODE_NORMAL);
+}
+// Similar tests for HIGH_RES and LOW_POWER
+\end{lstlisting}
+
+%%%%%
+
+
+
+\subsubsection{Test Case 3: Full-Scale Configuration}
+\textbf{Objective:} Validate configuration of $\pm$2g/$\pm$4g/$\pm$8g/$\pm$16g ranges 
+in CTRL\_REG4.
+
+\textbf{Procedure:} For each full-scale range: configure → read → verify.
+
+\textbf{Code:}
+\begin{lstlisting}[language=C, caption={Full-scale range configuration test}, 
+label={code:testcase3}]
+static bool testcase31() {  
+    lis3dh_set_full_scale(&lis3dh_acc, LIS3DH_FS_2G);
+    lis3dh_fscale_t fs = lis3dh_get_full_scale(&lis3dh_acc);
+    return (fs == LIS3DH_FS_2G);
+}
+// Similar tests for +-4g/+-8g/+-16g
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%
+
+\subsubsection{Test Case 4: Acceleration Data Injection and Conversion}
+\textbf{Objective:} Verify complete data flow: QOM injection → registers → I$^2$C read 
+→ firmware scaling.
+
+\textbf{Test sequence:}
+\begin{enumerate}
+  \item Configure Normal mode, $\pm$4g (So = 8~mg/LSB).
+  \item Inject via QEMU: \texttt{qom-set accel-x 1000}.
+  \item Firmware reads via \texttt{lis3dh\_read\_acc()} → verifies 1000~mg.
+\end{enumerate}
+
+\textbf{Code:}
+\begin{lstlisting}[language=C, caption={Acceleration data injection test}, 
+label={code:testcase4}]
+lis3dh_config.fscale = LIS3DH_FS_4G; 
+lis3dh_config.mode = LIS3DH_MODE_NORMAL;
+// ... config & enable DRDY ...
+// QEMU: qom-set accel-x 1000
+lis3dh_read_acc(&lis3dh_acc);
+printf("INT! X: %.2f mg", lis3dh_acc.data->acc_mg[0]);  // Expected: 1000.00
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Test Case 5: Data-Ready Interrupt Generation}
+\textbf{Objective:} Validate INT1 interrupt generation when new data is available.
+
+\textbf{Configuration:} \texttt{lis3dh\_enable\_drdy\_interrupt()}.
+
+\textbf{Test sequence:}
+\begin{enumerate}
+  \item Inject X/Y/Z data via QOM properties.
+  \item Verify EXTI1 (PA1) triggers → \texttt{HAL\_GPIO\_EXTI\_Callback()}.
+  \item Read data + INT1\_SRC (clears latched interrupt).
+  \item INT1 returns low.
+\end{enumerate}
+
+\textbf{Code:}
+\begin{lstlisting}[language=C, caption={Data-Ready interrupt handling}, 
+label={code:testcase5}]
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == LIS3DH_INT1_Pin) g_data_ready = true;
+}
+// Main loop
+if (g_data_ready)
+{
+  g_data_ready = false;  // Clear flag
+
+  // Read acceleration data
+  status = lis3dh_read_acc(&lis3dh_acc);
+  if (status == HAL_OK)
+  {
+    printf("INT! X: %.2f mg, Y: %.2f mg, Z: %.2f mg\n",
+        lis3dh_acc.data->acc_mg[0],
+        lis3dh_acc.data->acc_mg[1],
+        lis3dh_acc.data->acc_mg[2]);
+  }
+  else
+  {
+    printf("STM32: Read acc ERROR after interrupt\n");
+  }
+
+  // Read INT1_SRC to verify/clear interrupt source
+  uint8_t int_src = 0;
+  lis3dh_read_int_source(&lis3dh_acc, &int_src);
+  printf("INT1_SRC: 0x%02X\n", int_src);
+}
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

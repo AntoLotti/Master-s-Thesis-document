@@ -1,0 +1,75 @@
+\subsection{Data Structures \& Type Definitions}
+\label{sec:impl_i2c_data_structures}
+
+The I2C controller model comprises three files: \texttt{stm32f4xx\_i2c.c}, \\ \texttt{stm32f4xx\_i2c.h}, and \texttt{stm32f4xx\_types\_i2c.h}. The implementation 
+file (\texttt{.c}) contains all functions that define the controller's behavior and 
+enable QEMU to instantiate it. The header files (\texttt{.h}) define the C data 
+structures that compose the controller model, encapsulating both the visible hardware 
+state (registers accessible via MMIO) and the internal logical state required to 
+emulate the I2C protocol sequence.
+
+\subsubsection{Core Data Structure: \texttt{STM32F4XXI2CState}}
+
+The principal structure is \texttt{STM32F4XXI2CState}, declared using QOM API macros 
+to represent a complete I2C controller instance. The Code~\ref{code:i2c_state} shows 
+its declaration.
+
+\lstinputlisting[
+  language=C,
+  caption={\texttt{STM32F4XXI2CState} structure definition},
+  label=code:{STM32F4XXI2CState}
+]{Resources/Code/STM32F4XXI2CState.c}
+
+
+This structure is composed of several elements that fulfill various functions. The most important ones will be analyzed individually or mentioned as the section progresses. Although not all, some of the elements that make up this structure are:
+
+\begin{itemize}
+    \item \textbf{Ten 32-bit registers} (\texttt{i2c\_cr1} through \texttt{i2c\_fltr}) 
+    tahat mirror the I2C registers in the STM32F4 reference manual.
+    
+    \item An \texttt{I2CBus *bus} pointer enabling connection to QEMU's generic I2C 
+    subsystem, allowing communication with any connected slave device model.
+    
+    \item Dual interrupt lines (\texttt{irq\_event} and \texttt{irq\_error}) that 
+    replicate hardware separation between event-driven and error-driven interrupt 
+    sources.
+\end{itemize}
+
+\subsubsection{State Tracking Structure: \texttt{stm32f4xx\_i2c\_config\_t}}
+
+A secondary structure, \texttt{config} (type \texttt{stm32f4xx\_i2c\_config\_t}), 
+tracks logic not directly visible in hardware registers (see Appendix~\ref{ann:stm32f4xx_i2c_code}). 
+This structure is essential due to the STM32F405's complex flag-clearing semantics. 
+For example, the \texttt{ADDR} bit in \texttt{SR1} is cleared only when \texttt{SR1} 
+is read \emph{followed} by a read from \texttt{SR2}. The boolean member 
+\texttt{flg\_addr} records whether \texttt{SR1} has been read, allowing the subsequent 
+read from \texttt{SR2} to correctly clear the \texttt{ADDR} bit.
+
+\subsubsection{Finite State Machine: Protocol Behavior}
+
+The sequential nature of the I2C protocol---where register accesses trigger 
+state-dependent bus operations---necessitates a finite state machine (FSM) model. 
+This FSM serves as the operational heart of the emulated I2C controller, translating 
+register accesses into I2C bus transactions.
+
+The implementation defines two FSM-related types:
+
+\begin{itemize}
+    \item \textbf{\texttt{stm32f4xx\_i2c\_fsm\_trans\_t}}: A structure representing 
+    a single state transition.
+    
+    \item \textbf{\texttt{stm32f4xx\_i2c\_fsm\_t}}: A structure containing a pointer 
+    to an array of transitions and the current FSM state.
+\end{itemize}
+
+The \texttt{STM32F4XXI2CState} structure incorporates a pointer to 
+\texttt{stm32f4xx\_i2c\_fsm\_t}. The FSM states, encoded as an enumeration, reflect 
+the operational phases of the I2C controller in master mode as documented in the 
+STM32F405 reference manual, including edge cases for 1, 2, and 3-byte reception where 
+ACK/NACK timing differs.
+
+\lstinputlisting[
+  language=C,
+  caption={\texttt{fsm states encoded}},
+  label=code:i2c_state
+]{Resources/Code/fsm_states.c}

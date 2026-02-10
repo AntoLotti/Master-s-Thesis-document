@@ -1,0 +1,24 @@
+\chapter{Ethical, Economic, Social, and Environmental Aspects}
+
+\vspace{0.1cm}
+
+\Large{\textsc{\textcolor{orange}{A1. Introduction}}} \par
+\normalsize{The project consists of QEMU emulation of the I$^2$C protocol for the STM32F405 microcontroller and LIS3DH accelerometer, aimed at contributing to the UPM's virtual MICROLAB laboratory for Embedded Systems education. This development addresses the educational need to simulate STM32F4-DISCOVERY boards without physical hardware, reducing economic and logistical barriers in remote and self-paced teaching. The relevant aspects identified are: \textbf{social} (democratized access to laboratories), \textbf{economic} (hardware cost reduction), \textbf{ethical} (open-source licenses and privacy in virtual education), and \textbf{environmental} (elimination of electronic waste). The main stakeholders are UPM students/teachers, the SIVALSE/MICROLAB project, and the QEMU open-source community.}
+
+\vspace{0.1cm}
+
+\Large{\textsc{\textcolor{orange}{A2. Description of Relevant Impacts Related to the Project}}} \par
+\vspace{0.3cm}
+\normalsize{Among the impacts identified in the analysis phase, the most relevant stand out as the \textbf{positive social impact}: democratizes access to I$^2$C and sensorization practices for $\sim$200 annual Embedded Systems students at UPM, eliminating dependence on physical boards ($\sim$20€/unit) and enabling inclusive/remote teaching. The \textbf{positive environmental impact}: avoids acquisition of $\sim$500 STM32/LIS3DH boards over 2-3 years ($\sim$10,000€), promoting open-source software reuse. Economically, it reduces laboratory operating costs ($\sim$5,000€/year in hardware/replacements). Minor negative impacts include host energy consumption ($\sim$50W/h during use) and GPL/MIT license dependency. Prioritized stakeholders are students (direct beneficiaries), teachers (users), SIVALSE (maintainers), and STMicroelectronics (emulated hardware IP). Ethical negative impacts were discarded due to non-commercial educational use and technical fidelity without proprietary reverse-engineering.}
+
+\vspace{0.1cm}
+
+\Large{\textsc{\textcolor{orange}{A3. Detailed Analysis of One of the Impacts}}} \par
+\vspace{0.3cm}
+\normalsize{The \textbf{social impact: Democratization of educational access} is analyzed in detail. \textit{Quantification}: At UPM, $\sim$200 students/year perform I$^2$C practices with STM32F4-DISCOVERY + LIS3DH ($\sim$25€/kit). Virtual MICROLAB eliminates this cost, enabling unlimited executions on any PC. \textit{Qualitative analysis}: Reduces digital divide (students without hardware access), supports 24/7 self-paced learning, and enables hybrid teaching post-COVID. \textit{Mitigated risks}: HAL firmware verification ensures functional equivalence. \textit{Success indicators}: STM32CubeIDE compatibility, integration in Netduino Plus 2 (QEMU machine), and potential for 10+ new practices (sensorization, digital filters). Compared to commercial alternatives, QEMU being open-source maximizes social impact without economic barriers.}
+
+\vspace{0.1cm}
+
+\Large{\textsc{\textcolor{orange}{A4. Conclusions}}} \par
+\vspace{0.3cm}
+\normalsize{Integrating sustainability criteria has added significant value to the project, transforming a technical emulation into a tool with measurable social and environmental impact. Ethically, using open-source licenses (GPL/MIT) and ST datasheet fidelity promotes transparency and academic reuse. Socially, it democratizes embedded education for hundreds of UPM students. Economically, it saves thousands of euros in hardware. Environmentally, it avoids electronic waste and unnecessary energy consumption. These criteria guided key decisions (prioritizing HAL-compatibility over host optimization, documenting limitations), enhancing MICROLAB's pedagogical utility. The project exemplifies responsible engineering: sustainable software that multiplies educational access without compromising technical quality or generating negative impacts.}

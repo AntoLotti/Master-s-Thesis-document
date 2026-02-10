@@ -1,0 +1,23 @@
+\section{LIS3DH Design}
+\label{chap:design_lis3dh}
+
+The LIS3DH accelerometer model to be emulated in QEMU has been designed as an I$^2$C slave device, faithfully reproducing the register map and, to a large extent, the configuration logic for all operating parameters (data rate, sensitivity, etc.) defined in the STMicroelectronics datasheet, which were already analyzed in subsection~\ref{chap:analysis_lis3dh} of the analysis chapter (Chapter~\ref{chap:analysis} of this thesis). All of this aims to ensure that the firmware running on the emulated STM32F405 can configure and interact with the LIS3DH identically to the physical hardware.
+
+The logic of the configuration registers has been a crucial element. Although different options were considered, a mechanism was ultimately designed whereby any modification to the control registers immediately recalculates the operating parameters. The following specific functions have been developed to perform the calculation of the internal parameters:
+
+\lstinputlisting[
+    language=C,
+    caption={lis3dh parameters functions},
+    label={fig:lis3dh_parameters_functions}
+]{Resources/Code/lisedh/lis3dh_parameters_fun.c}
+
+One design decision made was to allow developers to directly inject known acceleration values into each axis using QOM properties. These properties are accel-x, accel-y, and accel-z, and represent the acceleration of each axis in milligravity units. The values these properties receive from the developer cannot be directly assigned to the output registers (OUT\_X\_L/H, OUT\_Y\_L/H, and OUT\_Z\_L/H); they must first undergo a three-stage conversion process:
+
+\begin{itemize}
+    \item \textbf{Range Validation   :} Input clamped to current FS limits (e.g., ±2000 mg for ±2g mode).
+    \item \textbf{Sensitivity Scaling:} Milligravity value divided by mode/FS-specific sensitivity coefficient.
+    \item \textbf{Bit-Justification  :} Resulting 16-bit value left-shifted by mode-specific offset (4 bits for High-Res, 6 for Normal, 8 for Low-Power) to match datasheet register layout.
+\end{itemize}
+
+
+This conversion process ensures that the output registers contain bit-precise representations that match the behavior of the physical sensor, allowing the HAL STM32 controllers to correctly avoid modifying the acceleration data.

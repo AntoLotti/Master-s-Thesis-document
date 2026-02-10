@@ -1,0 +1,57 @@
+\subsection{Memory-Mapped I/O Register Handling}
+\label{sec:mmio_handling}
+
+Firmware executing on the emulated STM32F405 accesses the I2C controller through 
+memory-mapped reads and writes to the APB1 peripheral space. For I2C1, this base 
+address is \texttt{0x40005400}. QEMU intercepts these memory accesses via the registered 
+\texttt{MemoryRegion} and dispatches them to register-specific handler functions.
+
+\subsubsection{Read Handler: \texttt{stm32f4xx\_i2c\_read()}}
+\label{subsec:read_handler}
+
+The \texttt{stm32f4xx\_i2c\_read()} function is launched when a register read operation is received, Code~\ref{code:read_dispatch}. 
+Within this function, a distinction is made between \emph{simple storage registers} 
+(e.g. \texttt{CR2}, \texttt{CCR}), which return their stored value directly, and \emph{registers with side 
+effects}, which trigger additional logic. For each of these registers with additional logic 
+associated with its reading, an associated function has been created that implements 
+said additional logic.
+
+\begin{itemize}
+    \item \texttt{stm32f4xx\_i2c\_read\_dr()} is executed for reading the \texttt{DR} register. It execute three critical operations:
+    
+    \begin{enumerate}
+        \item \textbf{Returns the received byte} from the internal buffer.
+        \item \textbf{Clears flags} in \texttt{SR1}: specifically \texttt{RXNE} and \texttt{BTF}, signaling to firmware that the data has been read.
+        \item \textbf{Triggers the FSM} via \texttt{stm32f4xx\_i2c\_fsm\_fire()}, potentially fetching the next byte from the I2C bus and advancing the protocol state.
+    \end{enumerate}
+
+    \item \texttt{stm32f4xx\_i2c\_read\_sr1()} is executed for reading the \texttt{SR1} register.
+
+    \begin{itemize}
+        \item Reading \texttt{SR1} sets internal tracking flags (\texttt{flg\_sb} and \texttt{flg\_addr}). 
+            Per STM32F405 semantics, reading \texttt{SR1} is the \emph{first step} in clearing 
+            \texttt{SB} (Start Bit) and \texttt{ADDR} (Address Match) flags. The actual clearing 
+            occurs only on subsequent reads of \texttt{DR} or \texttt{SR2}, as specified in the 
+            hardware reference manual.
+    \end{itemize}
+
+    \item \texttt{stm32f4xx\_i2c\_read\_sr2()} is executed for reading the \texttt{SR2} register.
+    \begin{itemize}
+        \item If the tracking flag \texttt{flg\_addr} is set, reading \texttt{SR2} clears the 
+        \texttt{ADDR} bit in \texttt{SR1}, completing the required ``read SR1 then read SR2'' 
+        sequence mandated by STM32F405 hardware.
+    \end{itemize}
+
+\end{itemize}
+
+
+
+\subsubsection{Write Handler: \texttt{stm32f4xx\_i2c\_write()}}
+\label{subsec:write_handler}
+
+It is the same logic as the read handler but applied to writing registers.
+Control registers \texttt{CR1} and \texttt{CR2} require specialized handlers because 
+writes can trigger significant state changes: starting I2C transactions (\texttt{START} 
+bit), enabling interrupts, or resetting the peripheral. The data register write handler 
+initiates actual transmission on the I2C bus. Configuration registers are updated 
+directly in the state structure, Code~\ref{code:write_dispatch}.

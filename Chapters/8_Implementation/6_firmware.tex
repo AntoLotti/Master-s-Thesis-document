@@ -1,0 +1,88 @@
+\section{Firmware}
+\label{chap:imp_firmware}
+
+With all hardware components modeled and integrated into the QEMU emulator, only 
+the firmware for loading onto the Netduino Plus 2 board and controlling the LIS3DH 
+accelerometer remains. Although Seeed-Studio provides an open-source library for 
+managing the LIS3DH accelerometer\footnote{\url{https://github.com/Seeed-Studio/Seeed_Arduino_LIS3DHTR}}, 
+this library has the disadvantage of being designed for Arduino or Raspberry Pi 
+boards, not for STM32-based platforms. Therefore, based on the Seeed-Studio library, 
+a custom C library was developed to manage the LIS3DH accelerometer.
+
+This library enables device configuration and reading of acceleration and 
+temperature data through the I$^2$C bus. It is designed for use with STM32F4 series 
+microcontrollers, specifically the STM32F405, utilizing STMicroelectronics' 
+Hardware Abstraction Layer (HAL) as its foundation. The library comprises three main files:
+
+\begin{enumerate}
+    \item \textbf{\texttt{lis3dh\_types.h}}: Contains data type definitions, 
+    enumerations, and structures necessary for the sensor interface.
+    
+    \item \textbf{\texttt{lis3dh\_driver.h}}: Defines constants, macros, and public 
+    function prototypes for the driver.
+    
+    \item \textbf{\texttt{lis3dh\_driver.c}}: Implements the configuration and 
+    communication logic with the LIS3DH sensor.
+\end{enumerate}
+
+\subsection{Data Structures}
+
+To encapsulate accelerometer information, the following structures were defined in 
+\texttt{lis3dh\_types.h}:
+
+\begin{itemize}
+    \item \textbf{\texttt{lis3dh\_config\_t}}: Stores device configuration, including 
+    measurement scale (2g, 4g, 8g, 16g), operating mode (high resolution, normal, 
+    low power), output data rate (ODR), and enablement of temperature sensor and 
+    high-pass filter.
+    
+    \item \textbf{\texttt{lis3dh\_data\_t}}: Contains sensor readings, i.e., 
+    accelerations on three axes (in mg) and temperature (in degrees Celsius).
+    
+    \item \textbf{\texttt{lis3dh\_t}}: Main structure grouping the I$^2$C handler, 
+    device address, configuration, sensitivity, and data.
+\end{itemize}
+
+\subsection{Implemented Functionality}
+
+The library provides the following functions:
+
+\subsubsection{Initialization and Configuration}
+
+\begin{itemize}
+    \item \texttt{lis3dh\_init}: Initializes the accelerometer structure, verifies 
+    I$^2$C communication, and configures default or user-provided parameters.
+    
+    \item \texttt{lis3dh\_configuration}: Applies specific device configuration, 
+    setting operating mode, scale, sampling rate, and enabling axes.
+\end{itemize}
+
+\subsubsection{Interrupt Configuration}
+
+\begin{itemize}
+    \item \texttt{lis3dh\_enable\_drdy\_interrupt}: Enables Data-Ready (DRDY) 
+    interrupt on the accelerometer's INT1 pin, notifying the microcontroller when 
+    new data is available.
+    
+    \item \texttt{lis3dh\_read\_int\_source}: Reads the interrupt source register, 
+    which also clears the interrupt.
+\end{itemize}
+
+\subsubsection{Data Reading}
+
+\begin{itemize}
+    \item \texttt{lis3dh\_read\_acc}: Reads acceleration registers, converts raw 
+    values to milligravity (mg) units, and stores them in the data structure.
+    
+    \item \texttt{lis3dh\_read\_temp}: Reads the temperature register and converts 
+    the value to degrees Celsius.
+\end{itemize}
+
+\subsubsection{Low-Level Functions}
+
+Four low-level functions have been designed in total. The functions \\
+\texttt{lis3dh\_read\_reg} and \texttt{lis3dh\_write\_reg} read and write a single 
+accelerometer register, while \texttt{lis3dh\_read\_regs\_array} and 
+\texttt{lis3dh\_write\_regs\_array} read and write multiple consecutive registers. 
+These four functions are essentially wrappers for the HAL functions 
+\texttt{HAL\_I2C\_Mem\_Write} and \texttt{HAL\_I2C\_Mem\_Read}. These four functions are the ones that the functions explained above use to access the LIS3DH registers via the I2C protocol

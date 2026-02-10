@@ -1,0 +1,36 @@
+\chapter{Testing}
+\label{chap:testing}
+
+The validation of the emulated STM32F405 I2C controller and LIS3DH accelerometer required a comprehensive testing strategy that verifies functional correctness, protocol compliance, and firmware portability. Unlike unit tests that isolate individual functions, the testing approach adopted in this thesis employs full-system integration testing: unmodified STM32CubeF4 HAL-based firmware executing within QEMU, interacting with the emulated peripherals via the emulated I2C bus, and producing observable outputs via UART console redirection.
+
+\textbf{Testing objectives:}
+
+\begin{enumerate}
+    \item \textbf{Protocol Fidelity:} Verify that I2C subaddressing, auto-increment, 
+    and register access sequences match the LIS3DH datasheet specifications.
+    
+    \item \textbf{Configuration Correctness:} Confirm that writing to control registers \\
+    (CTRL\_REG1 to CTRL\_REG6) produces correct internal state transitions 
+    (operating mode, full-scale range, output data rate).
+    
+    \item \textbf{Data Acquisition:} Validate that acceleration values injected via 
+    QEMU's QOM properties propagate correctly through register reads and produce 
+    accurate scaled output in milligravity units.
+    
+    \item \textbf{Interrupt Behavior:} Test Data-Ready (DRDY) interrupt generation 
+    on INT1, GPIO EXTI handling, and latched/non-latched interrupt modes.
+    
+    \item \textbf{HAL Driver Compatibility:} Demonstrate that STMicroelectronics' 
+    reference HAL drivers (\texttt{HAL\_I2C\_Mem\_Read()}, 
+    \texttt{HAL\_I2C\_Mem\_Write()}) execute without modification.
+\end{enumerate}
+
+
+% ==== Test Execution Enviroment ==== %
+\input{Chapters/9_Testing/2_enviroment.tex}
+
+% ==== Test Cases & Results ==== %
+\input{Chapters/9_Testing/3_test_case.tex}
+
+% ==== Test Cases & Results ==== %
+\input{Chapters/9_Testing/4_results.tex}

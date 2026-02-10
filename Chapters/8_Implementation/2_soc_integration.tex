@@ -1,0 +1,123 @@
+\section{STM32F405 SoC Integration}
+\label{sec:impl_soc}
+
+The STM32F405 SoC integration extends QEMU's existing \texttt{stm32f405\_soc} device to instantiate and configure the three I2C controllers (I2C1, I2C2, and I2C3) defined in the STM32F405 reference manual. This section details the structural modifications, instance initialization, and bus creation required to integrate the I2C subsystem into the SoC model.
+
+\subsection{Device State Structure Extension}
+
+By copying the way other elements have been implemented in the SoC structure, and having previously defined the constant \texttt{STM\_NUM\_I2CS} with a value of 3—due to the three I2C peripherals available in the STM32F405 microcontroller—, an array of type STM32F4XXI2CState, of length \texttt{STM\_NUM\_I2CS}, has been implemented in the structure, whose elements represent the three I2C controllers
+, Code~\ref{code:{STM32F4XXI2CState}}.\\
+
+\begin{lstlisting}[language=C, label={code:STM32F405State} caption={STM32F405State structure with I2C integration}]
+typedef struct STM32F405State {
+    SysBusDevice parent_obj;
+
+    /* ARM Cortex-M4 CPU */
+    ARMv7MState armv7m;
+
+    /* Existing peripherals */
+    :
+    STM32GPIOState gpio[STM_NUM_GPIOS];
+    STM32F4xxSPIState spi[STM_NUM_SPIS];
+    :
+    STM32F4XXI2CState i2c[STM_NUM_I2CS];
+
+    /* Other elements */
+    :
+} STM32F405State;
+\end{lstlisting}
+
+\subsection{Instance Initialization}
+
+The \texttt{stm32f405\_soc\_initfn()} function, invoked during device instantiation by QEMU's QOM framework, initializes each I2C controller instance and establishes parent-child relationships within the object hierarchy. The relevant code that has been added is:
+
+\begin{lstlisting}[language=C, caption={I2C instance initialization in SoC initfn}]
+static void stm32f405_soc_initfn(Object *obj)
+{
+    STM32F405State *s = STM32F405_SOC(obj);
+
+    /* ... other peripheral initializations ... */
+
+    /* Initialize each I2C controller */
+    for (i = 0; i < STM_NUM_I2CS; i++) 
+    {
+        object_initialize_child(obj, "i2c[*]", &s->i2c[i], TYPE_STM32F4XX_I2C);
+    };
+    
+    /* ... other peripheral initializations ... */
+}
+\end{lstlisting}
+
+The \texttt{object\_initialize\_child()} macro is another QOM utility. It is executed before the property configuration and realization, and that performs the following tasks:
+
+\begin{enumerate}
+    \item Allocates and initializes the child object (\texttt{STM32F4xxI2CState}).
+    \item Establishes a parent-child relationship in the object tree for proper lifecycle management.
+    \item Assigns a canonical path in QOM (e.g., \texttt{/machine/soc/i2c[0]}).
+\end{enumerate}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Device Realization and Memory Mapping}
+
+The I2C controller's register blocks are mapped to the ARM memory address space at the addresses specified in the STM32F405 datasheet. These addresses define where the firmware accesses the control and status registers of the I2C peripherals. In QEMU's code, these addresses are represented as the next arrays:
+
+\begin{lstlisting}[language=C, caption={I2C base address mapping}]
+static const uint32_t i2c_addr[] = {
+    0x40005400,  /* I2C1 base address */
+    0x40005800,  /* I2C2 base address */
+    0x40005C00   /* I2C3 base address */
+};
+\end{lstlisting}
+
+The STM32F405 NVIC (Nested Vectored Interrupt Controller) supports 96 interrupt sources (IRQ 0--95), each connected to specific hardware peripherals and events. The I2C controllers generate two distinct interrupt types: \textit{event interrupts} (EV) signal normal I2C protocol events (START condition detected, address matched, data byte transmitted), while \textit{error interrupts} (ER) signal protocol violations (bus error, arbitration loss, acknowledge failure).
+This is why in QEMU the I2C interrupt array is organized as interrupt pairs for each controller (event, error):
+
+\begin{lstlisting}[language=C, caption={I2C interrupt vector numbers}]
+static const int i2c_irq[] = {
+    31, 32,    /* I2C1: event (IRQ 31), error (IRQ 32) */
+    33, 34,    /* I2C2: event (IRQ 33), error (IRQ 34) */
+    72, 73     /* I2C3: event (IRQ 72), error (IRQ 73) */
+};
+\end{lstlisting}
+
+
+The \texttt{stm32f405\_soc\_realize()} function completes the I2C integration by realizing each controller device, retrieving the public bus reference, mapping I2C registers into the SoC's memory space, and connecting interrupt lines to the NVIC.
+
+\begin{lstlisting}[language=C, caption={I2C realization and memory mapping}]
+static void stm32f405_soc_realize(DeviceState *dev_soc, Error **errp)
+{
+    STM32F405State *s = STM32F405_SOC(dev_soc);
+    MemoryRegion *system_memory = get_system_memory();
+    DeviceState *dev, *armv7m;
+    DeviceState *lis3dh;;
+    SysBusDevice *busdev;
+    Error *err = NULL;
+    int i;
+    
+    /* I2C devices */
+    for (i = 0; i < STM_NUM_I2CS; i++) 
+    {
+        dev = DEVICE(&s->i2c[i]);
+
+        char *bus_name = g_strdup_printf("i2c%d", i+1);
+        qdev_prop_set_string(dev, "bus-name", bus_name );
+        g_free(bus_name);
+
+        if (!sysbus_realize(SYS_BUS_DEVICE(&s->i2c[i]), errp))
+            return;
+    
+        busdev = SYS_BUS_DEVICE(dev);
+        sysbus_mmio_map(busdev, 0, i2c_addr[i]);
+
+        /* Connect the two interrupts (event and error) for each I2C controller */
+        sysbus_connect_irq(busdev, 0,
+                           qdev_get_gpio_in(armv7m, i2c_irq[i*2]));
+        sysbus_connect_irq(busdev, 1,
+                           qdev_get_gpio_in(armv7m, i2c_irq[i*2+1]));         
+    }
+    
+    /* ... other peripheral realizations ... */
+}
+\end{lstlisting}
