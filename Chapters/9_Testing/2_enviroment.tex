@@ -16,13 +16,13 @@ Once the project is created, \texttt{STM32CubeMX} opens automatically, allowing 
 microcontroller to be configured visually as follows:
 
 \begin{enumerate}
-  \item Enable I$^2$C1 and configure it for 100~kHz operation with 7-bit addressing. 
-  Then assign the I2C1\_SCL and I2C1\_SDA lines to pins PB6 and PB7, respectively.
+  \item Enable I2C1 and configure it for 100~kHz operation with 7-bit addressing. 
+  Then assign the \texttt{I2C1\_SCL} and \texttt{I2C1\_SDA} lines to pins PB6 and PB7, respectively.
   
   \item Configure a UART peripheral to enable debugging.
   
   \item Reconfigure pin PA1, which is wired to the LIS3DH INT1 pin, to 
-  \textbf{GPIO\_EXTI1} mode. In the configuration for this pin, select 
+  \textbf{GPIO} \textbf{\_EXTI1} mode. In the configuration for this pin, select 
   ``External interrupt mode with rising edge trigger detection'' and ``No pull-up and 
   no pull-down''. Then, in the \textbf{NVIC} tab, enable the \textbf{EXTI line 1 
   interrupt} and assign it a priority of 5.

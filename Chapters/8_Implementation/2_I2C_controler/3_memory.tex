@@ -38,7 +38,7 @@ said additional logic.
     \item \texttt{stm32f4xx\_i2c\_read\_sr2()} is executed for reading the \texttt{SR2} register.
     \begin{itemize}
         \item If the tracking flag \texttt{flg\_addr} is set, reading \texttt{SR2} clears the 
-        \texttt{ADDR} bit in \texttt{SR1}, completing the required ``read SR1 then read SR2'' 
+        \texttt{ADDR} bit in \texttt{SR1}, completing the required read SR1 then read SR2 
         sequence mandated by STM32F405 hardware.
     \end{itemize}
 

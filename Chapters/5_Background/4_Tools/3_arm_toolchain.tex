@@ -11,8 +11,8 @@ no solution was found that requires fully virtual environments. Under this
 context two debugging options were evaluated:
 
 \begin{enumerate}
-    \item \textbf{QEMU's built-in GDB server (`-s -S`):} 
-        QEMU offers a feature that exposes a GDB stub on TCP port 1234. When used with `arm-none-eabi-gdb` in the firmware used for emulated execution of the STM32F405 (previously compiled using STM32CubeIDE), breakpoints, steps, register inspection, and memory watchpoints can be used on the emulated STM32F405.
+    \item \textbf{QEMU's built-in GDB server (\texttt{-s -S}):} 
+        QEMU offers a feature that exposes a GDB stub on TCP port 1234. When used with \texttt{arm-none-eabi-gdb} in the firmware used for emulated execution of the STM32F405 (previously compiled using STM32CubeIDE), breakpoints, steps, register inspection, and memory watchpoints can be used on the emulated STM32F405.
     \item \textbf{Eclipse CDT GDB plugin:} 
         Eclipse have a plugin for connecting to QEMU's GDB server, that provides a graphical frontend but it requires additional configuration beyond STM32CubeIDE's native ST-LINK focus
 \end{enumerate}
@@ -20,8 +20,8 @@ context two debugging options were evaluated:
     
 Due to its simplicity, zero external dependencies and direct integration with 
 the QEMU workflow, the QEMU integrated GDB server option with command 
-line `arm-none-eabi-gdb` was selected. The `arm-none-eabi-gdb` command is part 
+line \texttt{arm-none-eabi-gdb} was selected. The \texttt{arm-none-eabi-gdb} command is part 
 of the ARM GNU Toolchain, the official open-source development suite provided 
-by Arm for bare-metal Cortex-M programming. Apart from including the `arm-none-eabi-gdb` 
-it also includes: the compiler `arm-none-eabi-gcc`; the linker `arm-none-eabi-ld` 
-and the disassembler `arm-none-eabi-objdump`\cite{ArmGNU2026}\cite{ArmDocumentation2026}.
+by Arm for bare-metal Cortex-M programming. Apart from including the \texttt{arm-none-eabi-gdb} 
+it also includes: the compiler \texttt{arm-none-eabi-gcc}; the linker \texttt{arm-none-eabi-ld} 
+and the disassembler \texttt{arm-none-eabi-objdump} \cite{ArmGNU2026}\cite{ArmDocumentation2026}.

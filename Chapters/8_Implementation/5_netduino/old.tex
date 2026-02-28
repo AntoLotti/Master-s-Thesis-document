@@ -43,9 +43,9 @@ static void netduinoplus2_init(MachineState *machine)
 When the LIS3DH asserts its INT1 output in response to a data-ready event, the signal propagates through the device hierarchy as follows:
 
 \begin{enumerate}
-\item \textbf{LIS3DH Assertion}: The `lis3dh\_update\_drdy\_interrupt()` function calls `qemu\_irq\_raise(s->int1)` when new acceleration data becomes available and the I1\_ZYXDA bit in CTRL\_REG3 is set.
+\item \textbf{LIS3DH Assertion}: The \texttt{lis3dh\_update\_drdy\_interrupt()} function calls \texttt{qemu\_irq\_raise(s->int1)} when new acceleration data becomes available and the I1\_ZYXDA bit in CTRL\_REG3 is set.
 
-\item \textbf{EXTI Reception}: The QEMU IRQ infrastructure routes the signal to the EXTI device's `gpio\_in[1]` input. The EXTI device updates its pending register (EXTI\_PR) and, if the corresponding interrupt mask bit (EXTI\_IMR) is enabled, propagates the interrupt to its output.
+\item \textbf{EXTI Reception}: The QEMU IRQ infrastructure routes the signal to the EXTI device's \texttt{gpio\_in[1]} input. The EXTI device updates its pending register (EXTI\_PR) and, if the corresponding interrupt mask bit (EXTI\_IMR) is enabled, propagates the interrupt to its output.
 
 \item \textbf{NVIC Activation}: The EXTI output triggers NVIC IRQ 7 (EXTI1\_IRQn). The NVIC evaluates interrupt priority, preemption settings, and masking, then signals the ARM Cortex-M4 core to execute the exception handler.
 

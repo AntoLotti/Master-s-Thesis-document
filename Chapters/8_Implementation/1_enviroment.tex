@@ -68,7 +68,7 @@ This thesis emulates a Netduino Plus 2 development board to test the new feature
 
 \begin{figure}[H]
     \centering
-    \begin{verbatim}
+    \begin{lstlisting}[language=bash]
         $ mkdir -p bin/debug/native
 
         $ cd bin/debug/native
@@ -81,7 +81,7 @@ This thesis emulates a Netduino Plus 2 development board to test the new feature
         $ make -j$(nproc)
         
         $ cd ../../..
-    \end{verbatim}
+    \end{lstlisting}
     \caption{qemu build}
     \label{fig:qemu_build}
 \end{figure}
@@ -92,18 +92,18 @@ The flags \texttt{--enable-debug} and \texttt{--disable-strip} are used to enabl
 Once installed and configured for the requirements of this project, QEMU offers a 
 wide range of options for hardware emulation. For example, the command shown in 
 Figure~\ref{fig:qemu_debug_cmd} includes several debug flags that have been essential 
-throughout development, enabling debugging of both QEMU and the firmware.\\
+throughout development, enabling debugging of both QEMU and the firmware.
 
 \begin{figure}[H]
     \centering
     \begin{lstlisting}[language=bash]
         sudo ./qemu-system-arm \
-        -M netduinoplus2 \
-        -kernel firmware_test_1.elf \
-        -d trace:i2c_event \
-        -D debug.log \
-        -serial stdio \
-        -s -S
+                -M netduinoplus2 \
+                -kernel firmware_test_1.elf \
+                -d trace:i2c_event \
+                -D debug.log \
+                -serial stdio \
+                -s -S
     \end{lstlisting}
     \caption{QEMU command for debugging}
     \label{fig:qemu_debug_cmd}

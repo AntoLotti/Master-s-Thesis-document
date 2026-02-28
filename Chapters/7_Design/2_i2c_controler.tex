@@ -1,20 +1,20 @@
-\section{I2C Controller Design}
+\section{\texorpdfstring{I$^2$C Controller Design}{I2C Controller Design}}
 \label{chap:design_i2c_controler}
 
 
-As explained during the analysis, the I2C controller model of the STM32F405 
+As explained during the analysis, the I$^2$C controller model of the STM32F405 
 microcontroller must be able to recognize the specific sequences of register read and 
 write operations (Figures~\ref{fig:i2c_master_transmission} \& Figure~\ref{fig:i2c_master_recv}) that the firmware executes on the real 
-hardware to generate the I2C protocol events. This condition must be met for the 
-emulated hardware to be able to execute the same I2C events in QEMU.
+hardware to generate the I$^2$C protocol events. This condition must be met for the 
+emulated hardware to be able to execute the same I$^2$C events in QEMU.
 
-The analysis shows that the generation of I2C events in the controller model 
-depends not only on the current state of the registers but also on the previous I2C 
+The analysis shows that the generation of I$^2$C events in the controller model 
+depends not only on the current state of the registers but also on the previous I$^2$C 
 events. This implies that, in addition to implementing the individual logic for each 
 register, a finite state machine (FSM) must be implemented, triggered by the register 
 reads and writes.
 
-After an extensive reading of the I2C protocol in the STM32F405 
+After an extensive reading of the I$^2$C protocol in the STM32F405 
 microcontroller reference manual, and following the sequences of Figures~\ref{fig:i2c_master_transmission} and Figure~\ref{fig:i2c_master_recv} 
 which are also shown in the same manual, the state machine of Figure \ref{fig:i2c_fsm} 
 was reached. In the Table \ref{tab:i2c_fsm_state} are explained every state.
@@ -22,13 +22,12 @@ was reached. In the Table \ref{tab:i2c_fsm_state} are explained every state.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{Resources/Imagenes/fsm.png}
+    \includegraphics[width=1\textwidth]{Resources/Imagenes/fsm_2.png}
     \caption{stm32f405 i2c controller fsm}
     \label{fig:i2c_fsm}
 \end{figure}
 
 \begin{table}[H]
-    \centering
     \small
 
     \begin{tabularx}{\textwidth}{|c|X|c|X|}
@@ -52,23 +51,23 @@ was reached. In the Table \ref{tab:i2c_fsm_state} are explained every state.
         \hline
         \texttt{START} & \texttt{DR write} (R/W=1) & \texttt{S\_READ} & \texttt{i2c\_start\_transfer()}, set ADDR/RXNE/BTF \\
         \hline
-        \texttt{S\_READ} & \texttt{DR read} + \texttt{CR1[STOP]=1} + \texttt{ACK=0} + \texttt{POS=0} & \texttt{RECV\_1BYTE} & \texttt{i2c\_recv()}, set RXNE/BTF \\
+        \texttt{S\_READ} & \texttt{DR read} \& \texttt{CR1[STOP]=1} \& \texttt{ACK=0} \& \texttt{POS=0} & \texttt{RECV\_1BYTE} & \texttt{i2c\_recv()}, set RXNE/BTF \\
         \hline
-        \texttt{S\_READ} & \texttt{DR read} + \texttt{CR1[STOP]=1} + \texttt{ACK=0} + \texttt{POS=1} & \texttt{RECV\_2BYTES\_FIRST} & \texttt{i2c\_recv()}, set RXNE/BTF \\
+        \texttt{S\_READ} & \texttt{DR read} \& \texttt{CR1[STOP]=1} \& \texttt{ACK=0} \& \texttt{POS=1} & \texttt{RECV\_2BYTES\_FIRST} & \texttt{i2c\_recv()}, set RXNE/BTF \\
         \hline
-        \texttt{S\_READ} & \texttt{DR read} + \texttt{ACK=0} + \texttt{POS=0} & \texttt{RECV\_3BYTES} & \texttt{i2c\_recv()}, set RXNE/BTF \\
+        \texttt{S\_READ} & \texttt{DR read} \& \texttt{ACK=0} \& \texttt{POS=0} & \texttt{RECV\_3BYTES} & \texttt{i2c\_recv()}, set RXNE/BTF \\
         \hline
-        \texttt{S\_READ} & \texttt{DR read} + \texttt{ACK=1} & \texttt{RECV\_NBYTES} & \texttt{i2c\_recv()}, set RXNE/BTF \\
+        \texttt{S\_READ} & \texttt{DR read} \& \texttt{ACK=1} & \texttt{RECV\_NBYTES} & \texttt{i2c\_recv()}, set RXNE/BTF \\
         \hline
-        \texttt{RECV\_2BYTES\_FIRST} & \texttt{DR read} + \texttt{STOP=1} & \texttt{RECV\_2BYTES\_SECOND} & \texttt{i2c\_recv()} (last byte), generate NACK \\
+        \texttt{RECV\_2BYTES\_FIRST} & \texttt{DR read} \& \texttt{STOP=1} & \texttt{RECV\_2BYTES\_SECOND} & \texttt{i2c\_recv()} (last byte), generate NACK \\
         \hline
-        \texttt{RECV\_3BYTES} & \texttt{DR read} + \texttt{STOP=1} & \texttt{RECV\_2BYTES\_FIRST} & Transition to 2-byte receive mode \\
+        \texttt{RECV\_3BYTES} & \texttt{DR read} \& \texttt{STOP=1} & \texttt{RECV\_2BYTES\_FIRST} & Transition to 2-byte receive mode \\
         \hline
-        \texttt{RECV\_NBYTES} & \texttt{DR read} + \texttt{ACK=1} & \texttt{RECV\_NBYTES} & \texttt{i2c\_recv()}, continue NACK sequence \\
+        \texttt{RECV\_NBYTES} & \texttt{DR read} \& \texttt{ACK=1} & \texttt{RECV\_NBYTES} & \texttt{i2c\_recv()}, continue NACK sequence \\
         \hline
-        \texttt{RECV\_NBYTES} & \texttt{DR read} + \texttt{ACK=0} & \texttt{RECV\_3BYTES} & Prepare for 3-byte special case \\
+        \texttt{RECV\_NBYTES} & \texttt{DR read} \& \texttt{ACK=0} & \texttt{RECV\_3BYTES} & Prepare for 3-byte special case \\
         \hline
-        \texttt{RECV\_NBYTES} & \texttt{DR read} + \texttt{STOP=1} + \texttt{ACK=0} & \texttt{RECV\_2BYTES\_FIRST} & Final byte handling \\
+        \texttt{RECV\_NBYTES} & \texttt{DR read} \& \texttt{STOP=1} \& \texttt{ACK=0} & \texttt{RECV\_2BYTES\_FIRST} & Final byte handling \\
         \hline
         \texttt{RECV\_1BYTE} & \texttt{STOP=1} & \texttt{IDLE} & \texttt{i2c\_end\_transfer()} \\
         \hline

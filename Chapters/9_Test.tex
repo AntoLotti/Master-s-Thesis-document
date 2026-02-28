@@ -1,12 +1,12 @@
 \chapter{Testing}
 \label{chap:testing}
 
-The validation of the emulated STM32F405 I2C controller and LIS3DH accelerometer required a comprehensive testing strategy that verifies functional correctness, protocol compliance, and firmware portability. Unlike unit tests that isolate individual functions, the testing approach adopted in this thesis employs full-system integration testing: unmodified STM32CubeF4 HAL-based firmware executing within QEMU, interacting with the emulated peripherals via the emulated I2C bus, and producing observable outputs via UART console redirection.
+The validation of the emulated STM32F405 I$^2$C controller and LIS3DH accelerometer required a comprehensive testing strategy that verifies functional correctness, protocol compliance, and firmware portability. Unlike unit tests that isolate individual functions, the testing approach adopted in this thesis employs full-system integration testing: unmodified STM32CubeF4 HAL-based firmware executing within QEMU, interacting with the emulated peripherals via the emulated I$^2$C bus, and producing observable outputs via UART console redirection.
 
 \textbf{Testing objectives:}
 
 \begin{enumerate}
-    \item \textbf{Protocol Fidelity:} Verify that I2C subaddressing, auto-increment, 
+    \item \textbf{Protocol Fidelity:} Verify that I$^2$C subaddressing, auto-increment, 
     and register access sequences match the LIS3DH datasheet specifications.
     
     \item \textbf{Configuration Correctness:} Confirm that writing to control registers \\

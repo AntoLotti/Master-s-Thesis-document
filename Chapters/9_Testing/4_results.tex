@@ -83,6 +83,7 @@ INT1_SRC: 0x00
 
 \begin{table}[H]
     \centering
+    \small
     \caption{Test Objective to Result Mapping}
     \label{tab:test_objective_mapping}
     \begin{tabularx}{\textwidth}{|X|c|c|X|}
@@ -92,16 +93,16 @@ INT1_SRC: 0x00
         Protocol Fidelity & Test Case 1 & \textcolor{green}{PASSED} & 
         I$^2$C subaddressing;  auto-increment correct \\
         \hline
-        Configuration Correctness & TC2/TC3 & \textcolor{green}{PASSED} & 
+        Configuration Correctness & Test Case 2 \& 3 & \textcolor{green}{PASSED} & 
         Write in the control registers change the internal logic \\
         \hline
-        Data Acquisition & TC4 & \textcolor{green}{PASSED} & 
+        Data Acquisition & Test Case 4 & \textcolor{green}{PASSED} & 
         QOM → registers → perfect mg scaling \\
         \hline
-        Interrupt Behavior & TC5 & \textcolor{green}{PASSED} & 
+        Interrupt Behavior & Test Case 5 & \textcolor{green}{PASSED} & 
         DRDY → EXTI → clear non-latched working \\
         \hline
-        5. HAL Compatibility & All & \textcolor{green}{PASSED} (Native) & 
+        HAL Compatibility & All (Native) & \textcolor{green}{PASSED} & 
         \texttt{HAL\_I2C\_MemRead} \texttt{/Write()} unmodified \\
         \hline
     \end{tabularx}

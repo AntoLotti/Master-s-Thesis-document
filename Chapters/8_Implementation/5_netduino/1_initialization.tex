@@ -1,18 +1,19 @@
 \subsection{Netduino Plus 2 Initialization \& Pin Connection Architecture}
 
-The \texttt{netduinoplus2\_init()}(Code~\ref{code:netduinoplus2_init}) function is responsible for the complete system 
+The \texttt{netduinoplus2\_init()} (Code~\ref{code:netduinoplus2_init}) function, is responsible for the complete system 
 assembly, following QEMU's device instantiation hierarchy. The first thing this 
-function does is instantiate the STM32F405 SoC using the \texttt{qdev\_new(TYPE\_STM32F405\_SOC)} 
-function and realize it with the \texttt{sysbus\_realize\_and\_unref()} function. 
-This last function activates the SoC's internal \texttt{stm32f405\_soc\_realize()} 
+function does is instantiate the STM32F405 SoC using the \texttt{qdev\_new()} function with the parameter \texttt{TYPE\_STM32F405\_SOC} 
+and realize it with the \texttt{sysbus\_realize\_} \texttt{and\_unref()} function. 
+This last function activates the SoC's internal \texttt{stm32f405\_} \texttt{soc\_realize()} 
 function, which instantiates the three I$^2$C controllers and populates the 
-\texttt{s->I$^2$C[0].bus} pointer with the I$^2$C1 bus reference, making it available 
+\texttt{s->i2c[0].bus} pointer with the I2C1 bus reference, making it available 
 for connecting external devices. 
 
-After the SoC is realized, the LIS3DH accelerometer is created with 
-\texttt{qdev\_new(TYPE\_LIS3DH)}, configured with its 7-bit I$^2$C address 
-\texttt{0x18} (pin SA0 grounded), and connected to I$^2$C1 using 
-\texttt{I2C\_slave\_realize\_and\_unref()}.
+Once the SoC is implemented, the LIS3DH accelerometer is created again using 
+the \texttt{qdev\_new()} function, but with the \texttt{TYPE\_LIS3DH}. It is configured with its 7-bit 
+I2C address \texttt{0x18} (pin SA0 connected to ground) and connected to I2C1 using the 
+\texttt{i2c\_slave\_realize\_and\_unref()} function.
+
 
 The LIS3DH's INT1 interrupt output is routed to the STM32's EXTI 1 line using 
 \texttt{qdev\_connect\_gpio\_out()}, allowing the firmware to receive data-ready 
@@ -38,13 +39,13 @@ static void netduinoplus2_init(MachineState *machine)
     qdev_connect_clock_in(dev, "sysclk", sysclk);
     sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &error_fatal);
 
-    /* Initialize LIS3DH on I$^2$C1 */
+    /* Initialize LIS3DH on I2C1 */
     STM32F405State *s = STM32F405_SOC(dev);    
     DeviceState *lis3dh = qdev_new(TYPE_LIS3DH); // Creating LIS3DH accelerometer
     
-    I$^2$C_slave_set_address(I$^2$C_SLAVE(lis3dh), 0x18); // Setting I$^2$C address to 0x18    
-    I$^2$C_slave_realize_and_unref(I$^2$C_SLAVE(lis3dh), 
-                    s->I$^2$C[0].bus, &error_fatal);    // Connecting to I$^2$C1 bus
+    i2c_slave_set_address(I2C_SLAVE(lis3dh), 0x18); // Setting I2C address to 0x18    
+    i2c_slave_realize_and_unref(I2C_SLAVE(lis3dh), 
+                    s->i2c[0].bus, &error_fatal);    // Connecting to I2C1 bus
 
     qdev_connect_gpio_out(lis3dh, 0, qdev_get_gpio_in(DEVICE(&s->exti), 1));
 
@@ -58,15 +59,15 @@ static void netduinoplus2_init(MachineState *machine)
 
 \subsection{QEMU Device Hierarchy}
 
-When a Netduino Plus 2 machine instance is created, a hierarchical device tree is also created where the LIS3DH exists as an I²C slave device connected to the I²C1 bus of the STM32F405 SoC. Figure ~\ref{fig:qemu_hierarchy} illustrates the complete device hierarchy:
+When a Netduino Plus 2 machine instance is created, a hierarchical device tree is also created where the LIS3DH exists as an I$^2$C slave device connected to the I2C1 bus of the STM32F405 SoC. Figure ~\ref{fig:qemu_hierarchy} illustrates the complete device hierarchy:
 
 \begin{figure}[H]
     \centering
     \begin{verbatim}
     netduinoplus2 (Machine)
     \---- STM32F405_SOC
-        |---- I$^2$C[0] (I$^2$C1 Bus)
-        |   \---- lis3dh (I$^2$C Slave @ 0x18)
+        |---- I2C[0] (I2C Bus)
+        |   \---- lis3dh (I2C Slave @ 0x18)
         |       |---- int1 (qemu_irq out)  ----\
         |       \---- int2 (qemu_irq out)      |
         |                                      |
