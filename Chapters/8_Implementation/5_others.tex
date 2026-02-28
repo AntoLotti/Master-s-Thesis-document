@@ -4,7 +4,7 @@
 
 Once the I$^2$C controllers were implemented on the STM32F405 SoC and the LIS3DH accelerometer model was included in QEMU, the final integration step was to establish an I$^2$C connection between an instance of the accelerometer and an instance of the STM microcontroller.
 
-As explained in Chapter\ref{chap:design}, the Netduino Plus 2 board already has a model implemented in QEMU that uses an STM32F405 microcontroller. For this reason, it was decided to integrate a LIS3DH accelerometer as a component of the Netduino Plus 2 board itself, thus creating a complete integrated development environment. To perform functional tests and verify the interrupt operation, the INT1 interrupt pin of the accelerometer was wired to the PA1 pin of the STM32F405 microcontroller.
+As explained in Chapter \ref{chap:design}, the Netduino Plus 2 board already has a model implemented in QEMU that uses an STM32F405 microcontroller. For this reason, it was decided to integrate a LIS3DH accelerometer as a component of the Netduino Plus 2 board itself, thus creating a complete integrated development environment. To perform functional tests and verify the interrupt operation, the INT1 interrupt pin of the accelerometer was wired to the PA1 pin of the STM32F405 microcontroller.
 
 This section details the device hierarchy, interrupt pin routing, and initialization sequence that connects the LIS3DH accelerometer model to the STM32F405 SoC infrastructure.
 

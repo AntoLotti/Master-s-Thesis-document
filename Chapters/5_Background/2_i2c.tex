@@ -1,8 +1,8 @@
-\section{Inter-Integrated Circuit (I2C) Protocol}
+\section{\texorpdfstring{Inter-Integrated Circuit (I$^2$C) Protocol}{Inter-Integrated Circuit (I2C) Protocol}}
 \label{chap:Back_I2C}
 
 The Inter-Integrated Circuit protocol, often referred to as “I two C”, but mostly 
-known by its acronym I2C, is widely known and used in a wide range of electronic 
+known by its acronym I$^2$C, is widely known and used in a wide range of electronic 
 applications where simplicity and low manufacturing cost are more important than 
 speed. Developed in 1982 by Philips, now NXP Semiconductors, it was originally 
 designed as “a two-wire bus system comprising a clock wire and a data wire for 
@@ -11,15 +11,15 @@ integrated circuits in televisions and other consumer devices.
 
 The first I2C-enabled integrated circuits also appeared in 1982 \cite{I2CSpec2000}, operating in 
 Standard-mode at 100kHz and using 7-bit addressing, which allowed up to 112 
-devices to share the same bus. At that time, I2C remained proprietary to Philips 
+devices to share the same bus. At that time, I$^2$C remained proprietary to Philips 
 and was not yet publicly standardized. In 1992, Philips released version 1.0 of the 
-public I2C specification, which enabled broader industrial adoption of the protocol.
+public I$^2$C specification, which enabled broader industrial adoption of the protocol.
 
 The version 2.0 of the protocol was published in 1998. This version introduced 
 the Fast-mode and increasing the maximum clock frequency from 100 kHz to 400 
 kHz, as well as adding 10-bit addressing to expand the address space from 128 to 
 1024 possible addresses. As embedded systems grew more complex and applications 
-demanded higher data rates for inter-chip communication, the I2C protocol continued 
+demanded higher data rates for inter-chip communication, the I$^2$C protocol continued 
 to evolve without breaking backward compatibility, leading to the introduction 
 of \textit{Fast-mode Plus (Fm+)}, \textit{High-speed mode (Hs-mode)}, and \textit{Ultra Fast-mode (UFm)}, 
 which increased the data rate to approximately 1 Mbit/s, 3.4 Mbit/s, and 5 Mbit/s, 
@@ -48,7 +48,7 @@ respectivel
     \label{tab:i2c_transition_rate}
 \end{table}
 
-The I2C protocol is widely used, to the point that it is currently a de facto global 
+The I$^2$C protocol is widely used, to the point that it is currently a de facto global 
 standard, implemented in over 1,000 different ICs manufactured by more than 50 
 companies. This is primarily due to its requirement of only two communication lines, 
 making it a simple and inexpensive protocol for device manufacturers to implement.

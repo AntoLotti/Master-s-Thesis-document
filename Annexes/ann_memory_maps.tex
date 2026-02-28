@@ -4,9 +4,11 @@
 The Table \ref{tab:lis3dh_registers} provides a list of the 8-bit registers embedded in the LIS3DH 
 accelerometer and the corresponding addresses.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
-    \small
+    \footnotesize
+    \setlength{\tabcolsep}{4pt}
+    \renewcommand{\arraystretch}{0.9}
     \begin{tabular}{l c c c c c l}
         \toprule
         \textbf{Name} & \textbf{Type} & \multicolumn{2}{c}{\textbf{Register Address}} & \textbf{Default} & \textbf{Comment} \\
@@ -68,7 +70,7 @@ accelerometer and the corresponding addresses.
 
 \newpage
 
-The Figure \ref{fig:stm32f405_i2c} represents the complete mapping of the configuration bits of the I2C peripheral in the STM32F405.
+The Figure \ref{fig:stm32f405_i2c} represents the complete mapping of the configuration bits of the I$^2$C peripheral in the STM32F405.
 
 \begin{figure}[H]
     \centering

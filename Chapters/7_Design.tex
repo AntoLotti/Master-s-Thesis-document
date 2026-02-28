@@ -18,52 +18,11 @@ implementation described in Chapter~\ref{chap:implementation}.
 %==== Design Decisions ====%
 \input{Chapters/7_Design/1_decisions.tex}
 
+\newpage
 %==== I2C Controler ====%
 \input{Chapters/7_Design/2_i2c_controler.tex}
 
+\newpage
 %==== I2C Controler ====%
 \input{Chapters/7_Design/3_lis3dh_decisions.tex}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%The Table \ref{tab:project_features} summarizes the included and excluded features across both 
-%the STM32F405 I2C controller and the LIS3DH accelerometer.
-%
-%
-%\begin{table}[htbp]
-%    \centering
-%    \small
-%    
-%
-%    
-%    \caption{Overview of the features implemented and excluded from the emulated STM32F405 I2C controller and the emulated LIS3DH accelerometer.}
-%    \label{tab:project_features}
-%\end{table}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%\begin{table}[h]
-%\centering
-%\begin{tabular}{|l|l|l|}
-%\hline
-%\textbf{Component} & \textbf{Implemented Features} & \textbf{Excluded Features} \\
-%\hline
-%STM32F405 I2C & Master mode (7-bit addressing) & Slave mode \\
-% & Register interface (CR1, CR2, SR1, SR2, DR) & 10-bit addressing \\
-% & Event interrupts (I2C1\_EV) & Timing registers (CCR, TRISE) \\
-% & Error interrupts (I2C1\_ER) & DMA transfers \\
-% & Status flags (SB, ADDR, TXE, RXNE, BTF) & SMBus/PMBus modes \\
-% & START/STOP generation & Clock stretching \\
-% & Multi-byte read/write sequences & PEC (Packet Error Checking) \\
-%\hline
-%LIS3DH & Operating modes (Normal, High-Res, Low-Power) & FIFO buffer (32-level) \\
-% & Full-scale ranges (±2g, ±4g, ±8g, ±16g) & Threshold interrupts (INT1\_CFG) \\
-% & Output data registers (OUT\_X/Y/Z) & Click/tap detection (CLICK\_CFG) \\
-% & Control registers (CTRL\_REG1-6) & Activity/inactivity detection \\
-% & Data-ready interrupt (DRDY on INT1) & FIFO watermark/overrun interrupts \\
-% & Auto-increment I2C register addressing & Temperature sensor output \\
-% & All three axes (X, Y, Z) & ADC auxiliary channels \\
-%\hline
-%\end{tabular}
-%\caption{Emulation scope for STM32F405 I2C controller and LIS3DH accelerometer}
-%\label{tab:emulation_scope}
-%\end{table}

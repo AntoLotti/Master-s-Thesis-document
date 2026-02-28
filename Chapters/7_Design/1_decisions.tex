@@ -16,7 +16,7 @@ while maintaining full functional reliability for the intended use case.
 QEMU implements the  I$^2$C protocol through functions that abstract the different 
 events of the  I$^2$C protocol (Code~\ref{code:qemu_i2c_fun}), without requiring cycle-level clock generation. This 
 abstraction significantly reduces implementation complexity and preserves functional correctness for firmware testing. 
-To emulate the STM32F405 I2C protocol, this means that it is not necessary 
+To emulate the STM32F405 I$^2$C protocol, this means that it is not necessary 
 to implement the timing logic controlled by the I2C\_CCR and I2C\_TRISE registers.
 
 \lstinputlisting[

@@ -1,7 +1,8 @@
-\section{STM32F4xx I2C Controller Implementation}
+\section{\texorpdfstring{STM32F4xx I$^2$C Controller Implementation}{STM32F4xx I2C Controller Implementation}}
+
 \label{sec:impl_i2c}
 
-The STM32F4xx I2C controller emulation represents the most complex component of this implementation due to the intricate state machine required to translate firmware register operations into I2C bus events, Figure \ref{fig:i2c_fsm}. This section details the device structure, register implementation, finite state machine design, and integration with QEMU's I2C bus framework.
+The STM32F4xx I$^2$C controller emulation represents the most complex component of this implementation due to the intricate state machine required to translate firmware register operations into I2C bus events, Figure \ref{fig:i2c_fsm}. This section details the device structure, register implementation, finite state machine design, and integration with QEMU's I2C bus framework.
 
 
 %==== Type Definitions & fsm ====%

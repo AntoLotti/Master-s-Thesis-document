@@ -1,7 +1,7 @@
 \chapter{Implementation}
 \label{chap:implementation}
 
-This chapter presents the practical realization of the design decisions documented in Chapter~\ref{chap:design}. The implementation encompasses three primary components integrated into the QEMU emulation framework: the STM32F405 System-on-Chip (SoC) model extension, the STM32F4xx I2C controller device, and the LIS3DH accelerometer I2C slave device. Each component has been developed following QEMU's established architectural patterns, leveraging the QOM and qdev frameworks analyzed in Section~\ref{chap:qemu_qom} and ~\ref{chap:qemu_qdev}.
+This chapter presents the practical realization of the design decisions documented in Chapter~\ref{chap:design}. The implementation encompasses three primary components integrated into the QEMU emulation framework: the STM32F405 System-on-Chip (SoC) model extension, the STM32F4xx I$^2$C controller device, and the LIS3DH accelerometer I$^2$C slave device. Each component has been developed following QEMU's established architectural patterns, leveraging the QOM and qdev frameworks analyzed in the sections~\ref{chap:qemu_qom} and~\ref{chap:qemu_qdev}.
 
 Although this chapter repeatedly mentions several code fragments, for readability reasons, several have not been directly included. However, if needed, the final code for this thesis can be found in the following GitHub repository:
 

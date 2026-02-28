@@ -9,7 +9,7 @@ The logic of the configuration registers has been a crucial element. Although di
     language=C,
     caption={lis3dh parameters functions},
     label={fig:lis3dh_parameters_functions}
-]{Resources/Code/lisedh/lis3dh_parameters_fun.c}
+]{Resources/Code/lis3dh/lis3dh_parameters_fun.c}
 
 One design decision made was to allow developers to directly inject known acceleration values into each axis using QOM properties. These properties are accel-x, accel-y, and accel-z, and represent the acceleration of each axis in milligravity units. The values these properties receive from the developer cannot be directly assigned to the output registers (OUT\_X\_L/H, OUT\_Y\_L/H, and OUT\_Z\_L/H); they must first undergo a three-stage conversion process:
 
